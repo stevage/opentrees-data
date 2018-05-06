@@ -6,8 +6,9 @@ function cleanTree(t) {
     t.variety = t.variety || '';
     t.scientific = t.scientific || '';
 
-
-    t.scientific= (t.genus + ' ' + t.species).trim();
+    if (!t.scientific) {
+        t.scientific= (t.genus + ' ' + t.species).trim();
+    }
 
     // 'Remove vacant plantings'
     if (t.scientific === 'Vacant Planting' || t.description === 'Vacant Planting') {

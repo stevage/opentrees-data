@@ -127,5 +127,10 @@
         "gdal_options": "-s_srs unzip/OpenData_TI_Trees_LatestInspection.prj",
         "format":"zip",
         "filename": "OpenData_TI_Trees_LatestInspection.shp"
+    },
+    {
+        "id": "port_phillip",
+        "download": "https://data.gov.au/dataset/6b72d22b-d824-4281-bd08-ab62e3c38415/resource/9b0d7d55-5267-464b-85d7-3d141d779bab/download/city-of-port-phillip-trees.geojson",
+        "format": "geojson"
     }
 ]

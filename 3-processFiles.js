@@ -11,7 +11,26 @@ const cleanTree = require('./cleanTree');
 //glob('out_*.geojson', {}, files => {
 //    files.forEach(file => {
 
+const identity = {
+    scientific: 'scientific',
+    common: 'common',
+    species: 'species',
+    genus: 'genus',
+    dbh: 'dbh',
+    crown: 'crown',
+    height: 'height',
+    maturity: 'maturity',
+    health: 'health',
+    structure: 'structure',
+    location: 'location',
+    ref: 'ref',
+    planted: 'planted',
+    updated: 'updated',
+    ule: 'ule',
+    ule_min: 'ule_min',
+    ule_max: 'ule_max'
 
+}
 /* Given a GeoJSON feature, return a different one. */
 function processTree(source, tree) {
     var src = tree.properties;
@@ -19,8 +38,9 @@ function processTree(source, tree) {
     var props = tree.properties = {
         source: source
     };
-    let identity = {};
-    Object.keys(tree.properties).forEach(p => identity[p] = p);
+    // let identity = {};
+    // Object.keys(src).forEach(p => identity[p] = p);
+
     const crosswalk = {
         ryde: {
             height: 'height',
@@ -65,7 +85,7 @@ function processTree(source, tree) {
             location: x => ({ 'STREET TREE': 'street', 'PARK TREE': 'park' }[x.tree_type] || '')
         }, manningham: {
             captured: 'date1',  // TODO YYYY-MM-DD
-            ref: 'tree_no', 
+            ref: 'tree_no', // hansen_id?
             scientific: 'species', 
             height: 'height', 
             dbh: 'dbh'
@@ -75,24 +95,25 @@ function processTree(source, tree) {
             // TODO captured is a date
 
         }, adelaide: {
-            ref: 'asset id (identifier)',
-            dbh: 'circum (inspection)',
-            health: 'vigour (inspection)',
-            height: 'height (inspection)',
-            structure: 'structure (inspection)',
-            maturity: 'age (inspection)',
-            scientific: 'species name (inspection)',
-            common: 'common name (inspection)'
+            ref: 'Asset Id (identifier)',
+            dbh: x => x['Circum (Inspection)'] + ' circumference',
+            health: 'Vigour (Inspection)',
+            height: 'Height (Inspection)',
+            structure: 'Structure (Inspection)',
+            maturity: 'Age (Inspection)',
+            scientific: 'Species Name (Inspection)',
+            common: 'Common Name (Inspection)'
         }, waite_arboretum: {
             ref: 'tree_id',
             scientific: 'scientific',
             common: 'commonname',
             //planted: CASE WHEN length(yearplant::varchar) = 4 THEN to_date(yearplant::varchar, 'YYYY') END AS planted
         }, burnside: {
-            ref: 'id',
-            common: 'commonname',
-            maturity: 'treeage',
-            height: 'treeheight'
+            ref: 'TreeID',
+            common: 'CommonName',
+            height: 'TreeHeight',
+            scientific: 'BotanicalN',
+            dbh: 'Circumfere' // TODO reconcile
         }, launceston: {
             ref: 'objectid',
             common: 'name',
@@ -166,6 +187,17 @@ function processTree(source, tree) {
             maturity: 'age_class',
             ule: 'life_expec'
             //historical, rare_speci, canopy_den, est_age, prop_name, suburb, street_nam
+        }, port_phillip: {
+            ...identity
+        }, prospect1: {
+            species: 'Tree Species',
+            maturity: 'Tree Age',
+            dbh: x => x['Tree Circumference'] + ' circumference',
+            health: 'Tree Health',
+            structure: 'Tree Structure',
+            height: 'Tree Height'
+        }, prospect2: {
+            species: 'Species Name',
         }
 
 
@@ -197,7 +229,9 @@ function processTree(source, tree) {
 
     Object.keys(crosswalk).forEach(prop => {
         let val = (typeof crosswalk[prop] === 'function') ? crosswalk[prop](src) : src[crosswalk[prop]];
-        tree.properties[prop] = val;
+        if (val !== undefined) {
+            tree.properties[prop] = val;
+        }
     });
     delete(tree.lat);
     delete(tree.lon);

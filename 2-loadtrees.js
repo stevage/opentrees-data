@@ -16,6 +16,7 @@ const source = 'data/southern_grampians.geojson';
 sources.forEach(source => {
     // if (source.id !== 'ballarat') return;
     var filename;
+    var outname = `tmp/out_${source.id}.geojson`;
     try {
         if (source.format.match(/geojson|csv/)) {
             filename = `${source.id}.${source.format === 'csv' ? 'vrt' : source.format}`;
@@ -27,10 +28,14 @@ sources.forEach(source => {
         } else {
             console.log('Skipping '.yellow + source.id)
         }
+        if (fs.existsSync(outname)) {
+            console.log('Skipping '.yellow + source.id + ' (already exists)');
+            return;
+        }
         if (filename) {
             // child_process.execSync(`ogr2ogr --config OGR_SQLITE_CACHE 512 -append -f SQLite ${db} -gt 65536 ${filename} -nln ${source.id} -lco SPATIAL_INDEX=NO`);
             console.log(filename);
-            let cmd = `ogr2ogr -oo RFC7946=YES -t_srs EPSG:4326 -gt 65536 -f GeoJSON ../tmp/out_${source.id}.geojson ${source.gdal_options || ''} ${filename}`;
+            let cmd = `ogr2ogr -oo RFC7946=YES -t_srs EPSG:4326 -gt 65536 -f GeoJSON ../${outname} ${source.gdal_options || ''} ${filename}`;
             console.log(cmd.cyan);
             child_process.execSync(cmd, { cwd: 'data' });
             console.log(`Loaded ${filename}`);

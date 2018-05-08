@@ -18,7 +18,7 @@ sources.forEach(source => {
     var filename;
     var outname = `tmp/out_${source.id}.geojson`;
     try {
-        if (source.format.match(/geojson|csv/)) {
+        if (source.format.match(/geojson|csv|shp/)) {
             filename = `${source.id}.${source.format === 'csv' ? 'vrt' : source.format}`;
             //console.log(`ogr2ogr --config OGR_SQLITE_CACHE 512 -append -f SQLite ${db} -gt 65536 ${filename} -nln ${source.id} -lco SPATIAL_INDEX=NO`);
         } else if (source.format === 'zip') {

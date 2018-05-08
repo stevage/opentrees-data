@@ -132,5 +132,10 @@
         "id": "port_phillip",
         "download": "https://data.gov.au/dataset/6b72d22b-d824-4281-bd08-ab62e3c38415/resource/9b0d7d55-5267-464b-85d7-3d141d779bab/download/city-of-port-phillip-trees.geojson",
         "format": "geojson"
+    },
+    {
+        "id": "boroondara",
+        "download": "https://data.gov.au/geoserver/significant-tree/wfs?request=GetFeature&typeName=ckan_14e2b87e_c733_4071_b604_c0cb33d14a42&outputFormat=json",
+        "format": "geojson"
     }
 ]

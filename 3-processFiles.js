@@ -160,9 +160,10 @@ function processTree(source, tree) {
             ref: 'assetid',
             description: 'desc',
             //type
-            genus: 'genus',
-            species: 'species',
-            variety: 'cultivar',
+            // genus: 'genus', // contains rubbish like "Eucalyptus M to Z" whereas scientific is clean.
+            scientific: x => x.species.split(' - ')[0],
+            common: x => x.species.split(' - ')[1],
+            variety: x => x.cultivar !== 'Not Specified' ? x.cultivar : '',
             // house, st_name, st_type, st_suffix, suburb
         }, wyndham: {
             ref: 'tree_id',
@@ -198,6 +199,18 @@ function processTree(source, tree) {
             height: 'Tree Height'
         }, prospect2: {
             species: 'Species Name',
+        }, boroondara: {
+            species: 'botanicaln',
+            common: 'commonname',
+            height: 'height',
+            crown: 'canopyspre', // canopysp_1?
+            health: 'health',
+            description: 'significan',
+            location: 'locality',
+            dbh: x => x.girth + ' girth'
+            // suburb, groupid, qty, girth, age, position, risktotree, hazardtopu, streetnr
+        }, ryde: {
+            height: 'Height' // sad, that's all there is.
         }
 
 
@@ -240,17 +253,28 @@ function processTree(source, tree) {
 
 function countSpecies(tree) {
     if (tree.genus && tree.species) {
-        if (!speciesCount[tree.genus]) {
+        speciesCount[tree.genus + ' ' + tree.species] = 1 + (speciesCount[tree.genus + ' ' + tree.species] || 0)
+        /*if (!speciesCount[tree.genus]) {
             speciesCount[tree.genus] = {};
         }
-        speciesCount[tree.genus][tree.species] = 1 + (speciesCount[tree.genus][tree.species] || 0);
+        speciesCount[tree.genus][tree.species] = 1 + (speciesCount[tree.genus][tree.species] || 0);*/
     }
 }
 
 function addSpeciesCount(tree) {
     if (tree.genus && tree.species) {
-        tree.species_count = speciesCount[tree.genus][tree.species];
+        tree.species_count = speciesCount[tree.genus + ' ' + tree.species];
     }
+}
+
+function showSpeciesCounts() {
+    console.log(
+        Object.keys(speciesCount)
+        .sort((a, b) => speciesCount[b] - speciesCount[a])
+        .slice(0, 20)
+        .map(k => k + ': ' + speciesCount[k])
+        .join('\n')
+    );
 }
 
 console.log('Combining temporary files in tmp/out_* into processed tmp/allout.json');
@@ -273,7 +297,7 @@ sources.forEach(source => {
         countSpecies(tree.properties);
     });
     outTrees.push(trees);
-    console.log('Processed ' + source.id);
+    // console.log('Processed ' + source.id);
 
 });
 const out = fs.createWriteStream('tmp/allout.json').on('error', console.error);
@@ -287,4 +311,6 @@ outTrees.forEach(trees => {
     });
     process.stdout.write('*');
 });
+console.log();
+showSpeciesCounts();
 console.log('\nDone.');

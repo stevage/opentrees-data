@@ -21,7 +21,7 @@ sources.forEach(function(source) {
     urls.forEach(url => {
         // hmm, 'format' is used for saving the file, but also knowing what file to import.
         var format = source.format;
-        if (!format && !source.keepExtension) {
+        if (source.keepExtension) {
             format = url.match(/\.([^.]+)$/)[1];
         }
         
@@ -48,7 +48,7 @@ sources.forEach(function(source) {
                 console.error((filename + ': ').red + err);
             });
         } else {
-            //console.log('(Skip ' + filename + ')');
+            console.log('(Skip ' + filename + ')');
         }
     });
 });

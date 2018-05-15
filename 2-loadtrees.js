@@ -12,7 +12,7 @@ const child_process = require('child_process');
 
 child_process.execSync('cp vrt/* data');
 
-const source = 'data/southern_grampians.geojson';
+// const source = 'data/southern_grampians.geojson';
 sources.forEach(source => {
     // if (source.id !== 'ballarat') return;
     var filename;

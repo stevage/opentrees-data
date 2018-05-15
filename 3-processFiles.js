@@ -1,8 +1,10 @@
 #!/usr/bin/env node --max-old-space-size=8192
+/* jshint esnext:true */
 // const glob = require('glob');
 const fs = require('fs');
 // const processTree = require('./3-processTree');
 const jsonfile = require('jsonfile');
+const readJson = require ('util').promisify(jsonfile.readFile);
 
 let sources = require('./sources.json');
 const cleanTree = require('./cleanTree');
@@ -92,7 +94,7 @@ function processTree(source, tree) {
             height: 'height', 
             dbh: 'dbh'
         }, geelong: {
-            ...identity,
+            ...identity, // requires Node 10
             scientific: x => x.genus + ' ' + (x.species || '').toLowerCase(),
             // TODO captured is a date
 
@@ -243,10 +245,6 @@ function processTree(source, tree) {
 function countSpecies(tree) {
     if (tree.genus && tree.species) {
         speciesCount[tree.genus + ' ' + tree.species] = 1 + (speciesCount[tree.genus + ' ' + tree.species] || 0)
-        /*if (!speciesCount[tree.genus]) {
-            speciesCount[tree.genus] = {};
-        }
-        speciesCount[tree.genus][tree.species] = 1 + (speciesCount[tree.genus][tree.species] || 0);*/
     }
 }
 
@@ -268,38 +266,37 @@ function showSpeciesCounts() {
 
 console.log('Combining temporary files in tmp/out_* into processed tmp/allout.json');
 let speciesCount = {}, outTrees = [];
-sources.forEach(source => {
-    let trees;
-    try {
-        trees = jsonfile.readFileSync('tmp/out_' + source.id + '.geojson').features;
-    } catch (e) { 
-        return;
-    }    
-    console.log(source.id + ': ' + trees.length);
-    trees.forEach(tree => {
-        // console.log('yerp');
-        tree = processTree(source.id, tree);
-        if (tree.properties._del) {
-            return;
-        }
-        cleanTree(tree.properties);
-        countSpecies(tree.properties);
-    });
-    outTrees.push(trees);
-    // console.log('Processed ' + source.id);
-
-});
-const out = fs.createWriteStream('tmp/allout.json').on('error', console.error);
-process.stdout.write('Writing out: ');
-outTrees.forEach(trees => {
-    trees.forEach(tree => {
-        addSpeciesCount(tree.properties);
-        if (!tree.properties._del) {
+let loads = sources.map(source => 
+        readJson('tmp/out_' + source.id + '.geojson')
+        .then(data => {
+            console.log(source.id + ': ' + data.features.length);
+            for (let tree of data.features) {
+                tree = processTree(source.id, tree);
+                if (tree.properties._del) {
+                    break;
+                }
+                cleanTree(tree.properties);
+                countSpecies(tree.properties);
+                outTrees.push(tree);
+            }
+        }).catch(e => {
+            console.error('Error loading ' + source.id);
+            console.error(err);
+        })
+    );
+Promise.all(loads).then(() => {
+    const out = fs.createWriteStream('tmp/allout.json').on('error', console.error);
+    process.stdout.write('Writing out: ');
+    outTrees.forEach(tree => {
+        // trees.forEach(tree => {
+            addSpeciesCount(tree.properties);
+            // if (!tree.properties._del) {
             out.write(JSON.stringify(tree) + '\n');
-        }
+            // }
+        // });
+        // process.stdout.write('*');
     });
-    process.stdout.write('*');
+    console.log();
+    showSpeciesCounts();
+    console.log('\nDone.');
 });
-console.log();
-showSpeciesCounts();
-console.log('\nDone.');

@@ -16,6 +16,8 @@ const identity = {
     common: 'common',
     species: 'species',
     genus: 'genus',
+    variety: 'variety',
+    description: 'description',
     dbh: 'dbh',
     crown: 'crown',
     height: 'height',
@@ -211,25 +213,12 @@ function processTree(source, tree) {
             // suburb, groupid, qty, girth, age, position, risktotree, hazardtopu, streetnr
         }, ryde: {
             height: 'Height' // sad, that's all there is.
+        }, ballarat: {
+            ...identity,
+            genus: () => undefined, // contains same as species, this way it gets generated properly.
+            scientific: 'species'
+            // aohplaque, maintenance, description
         }
-
-
-
-
-        /*ballarat: {
-            scientific: 'species',
-            crown: 'crown',
-            ref: 'ref',
-            common: 'common',
-            location: 'maturity',
-            maturity: '',
-            health: '',
-            structure: '',
-            variety: '',
-            description: '',
-            ule_min: '',
-            ule_max
-        }*/
     
     }[source] || {};
     // TODO scrap all non-standard fields (esp lat, lon, ...)

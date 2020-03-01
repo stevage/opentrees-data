@@ -6,3 +6,8 @@
 /node_modules/
 
 /tmp/
+/config.json
+/bad-species.txt
+/APC-taxon-2020-02-20-5349.csv
+/global_tree_search_trees_1_3.csv
+/out/

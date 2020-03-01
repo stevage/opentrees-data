@@ -4,7 +4,7 @@ const fs = require('fs');
 const colors = require('colors');
 const download = require('download');
 const extract = require('extract-zip');
-const sources = require('./sources.json');
+const sources = require('./sources');
 
 ['./data', './data/unzip', './tmp'].forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -27,7 +27,7 @@ sources.forEach(function(source) {
         
         var filename = 'data/' + source.id + '.' + format;
         if (!fs.existsSync(filename)) {
-            console.log('Downloading ' + /*source.download + ' to ' + */ filename);
+            console.log('Downloading '.cyan + /*source.download + ' to ' + */ filename);
 
             
             download(url).then(data => {

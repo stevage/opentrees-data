@@ -1,0 +1,8 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="wodonga">
+        <SrcDataSource>wodonga.csv</SrcDataSource>
+        <GeometryType>wkbPoint</GeometryType>
+        <LayerSRS>EPSG:4326</LayerSRS>
+        <GeometryField encoding="PointFromColumns" x="field_5" y="field_6"/>
+    </OGRVRTLayer>
+</OGRVRTDataSource>

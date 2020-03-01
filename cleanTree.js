@@ -1,46 +1,63 @@
+function match(s, regex) {
+    return s && s.match(regex);
+}
+
+
 function cleanTree(t) {
-    //\echo "Turn nulls into blanks"
-    // previously this test only happened if all of these were null. significant?
-    t.genus = t.genus || '';
+    t.genus = (t.genus || '').trim();
     t.species = t.species || '';
     t.variety = t.variety || '';
-    t.scientific = t.scientific || '';
+    t.scientific = (t.scientific || '').trim();
 
-    if (!t.scientific) {
-        t.scientific= (t.genus + ' ' + t.species).trim();
-    }
 
     // 'Remove vacant plantings'
-    if (t.scientific === 'Vacant Planting' || t.description === 'Vacant Planting') {
+    const notPresentRegex = /\b(vacant planting|no tree|removed|destroyed)/i;
+    if (match(t.scientific, notPresentRegex) ||  match(t.description, notPresentRegex) || match(t.common, notPresentRegex)) {
         t._del = true;
-        return; // TODO
+        return;
+    }
+
+    const unknownRegexp = /^(null$|Unidentified|Unknown|Not |To be|To define|not\b|tba)/i;
+    if (match(t.scientific, unknownRegexp)) {
+        t.description = t.scientific;
+        t.scientific = t.genus = t.species = '';
+    }
+    if (match(t.genus, unknownRegexp)) {
+        t.description = t.genus;
+        t.scientific = t.genus = t.species = '';
+    }
+    if (match(t.species, unknownRegexp)) {
+        t.species = '';
+    }
+    if (match(t.common, unknownRegexp)) {
+        t.common = '';
     }
 
     //'Convert "Stump", "Natives - mixed" etc to descriptions'
-    if (t.scientific.match(/^(Native|Ornamental|Unidentified|Unknown|Stump|Not )/i)) {
+    if (match(t.scientific, /^(Native|Ornamental|Stump)/i)) {
         t.description = t.scientific;
         t.scientific = t.genus = t.species = '';
     }
 
-    if (t.scientific.match(/^(Rose |Fan Palm)/i)) {
+    if (match(t.scientific, /^(Rose |Fan Palm)/i)) {
         t.common = t.scientific;
         t.scientific = t.genus = t.species = '';
     }
 
-    /* TODO  
+    if (t.common && match(t.common, /^unknown|not specified|not listed/i)) {
+        t.common='';
+    }
 
-    \echo "Split variety from scientific name"
-    UPDATE alltrees
-    SET variety=trim(replace(substr(scientific, strpos(scientific, '''')), '''', '') ),
-        scientific=trim(substr(scientific, 1, strpos(scientific, '''')-1))
-    WHERE scientific LIKE'%''%';
-
-    */
+    
     let parts = t.scientific.split(' ');
     //"Split scientific names into genus, species: Split 'Cedrus atlantica' -> Cedrus, atlantica"
     if (parts.length >= 2 && !t.genus) {
         t.genus = parts[0];
-        t.species = parts[1];
+        if (parts[1].match(/[xX×]/)) {
+            t.species = parts.slice(1).join(' ');
+        } else {
+            t.species = parts[1];
+        }
     }
 
 
@@ -52,6 +69,12 @@ function cleanTree(t) {
 
     //\echo "Handle 'cultivar'"
     if (t.species.match(/^cultivar$/i)) {
+        t.variety = t.species;
+        t.species = '';
+    }
+
+    // variety incorrectly stored as species, eg Tristaniopsis 'Luscious'
+    if (match(t.species, /^['"]/)) {
         t.variety = t.species;
         t.species = '';
     }
@@ -77,27 +100,38 @@ function cleanTree(t) {
 
 
     // \echo "Botlebrush -> Bottlebrush"
-    if (t.scientific.match(/Callistemon kings park special/i) && t.common.match(/botle/)) {
-        t.common = 'Red Bottlebrush';
-        t.species = '';
+    if (match(t.scientific, /Callistemon .?kings park special.?/i)) {
+        if (t.common && t.common.match(/botle/)) {
+            t.common = 'Red Bottlebrush';
+        }
+        t.genus = 'Callistemon';
+        t.species = 'viminalis'; // or could be citrinus, who knows
         t.variety = "King's Park Special";
     }
 
     [
         [/Cordyline cordyline/i, 'Cordyline', 'Cordyline', ''],
         [/Eucalyptus leucoxylon euky dwar/i, 'Eucalyptus leucoxylon', 'Eucalyptus', 'leucoxylon'],
+        [/Pyrua calleryana - capital/i, 'Pyrus calleryana', 'Pyrus', 'calleryana'], // "Capital" variety...e
+        [/Fraxinus raywood(ii)?/i, 'Fraxinus angustifolia', 'Fraxinus', 'angustifolia', 'Raywoodii'],
+        
+
     ].forEach(a => {
-        let [scientificFrom, scientificTo, genusTo, speciesTo] = a;
-        if (t.scientific.match(scientificFrom)) {
+        const [scientificFrom, scientificTo, genusTo, speciesTo, varietyTo] = a;
+        if (match(t.scientific, scientificFrom)) {
             t.scientific = scientificTo;
             t.genus = genusTo;
             t.species = speciesTo;
+            if (varietyTo) {
+                t.variety = varietyTo;
+            }
         }        
     });
 
     [
         ['desmithiana', 'desmetiana'],
-        ['linarifolia','linariifolia'],
+        ['linarifolia','linariifolia'], // argh, it could be either linearfolia or linariifolia
+        ['linaifolia', 'linariifolia'],
         ['columellaris','columerauis'],
         ['bacculenta','bucculenta'],
         ['stypheliodes', 'styphelioides'],
@@ -108,18 +142,31 @@ function cleanTree(t) {
         ['nesophillia','nesophilia'],
         ['jorulensis','jorullensis'],
         ['blierana','x blireana'],
-        ['monsplessulana', 'monspessulana']
+        ['monsplessulana', 'monspessulana'],
+        ['angustigolia', 'angustifolia'],
+        ['siedroxylon', 'sideroxylon'],
+        ['usseriensis', 'ussuriensis'],
+        ['blakleyi', 'blakelyi'],
+        ['bignoniodes', 'bignonioides'],
+        ['ferdinandii', 'ferdinandi', 'Glochidion'], // Sometimes ferdinandii is correct
+        ['azederach', 'azedarach'],
+        ['patersonii', 'patersonia', 'Lagunaria'],
+        ['xblireana', 'x blireana'],
+        ['cinera', 'cinerea'],
+        ['salibris', 'salubris'],
+        ['verticulata', 'verticillata'],
+
     ].forEach(a => {
-        let [speciesFrom, speciesTo] = a;
-        if (t.species.match(speciesFrom)) {
+        let [speciesFrom, speciesTo, genusFrom] = a;
+        if (match(t.species, speciesFrom) && (!genusFrom || genusFrom === t.genus)) {
             t.species = speciesTo;
             t.scientific = '';
         }        
     });
-
-
-    // insert into _speciesfix (speciesfrom, speciesto, genus) values
-    //   ('syriaca', 'syriacus', 'Hibiscus');
+    /*
+    To ponder:
+    - names like "Photinia robusta" which should actually be "Photinia x fraseri 'robusta'"
+    */
 
     [
         ['Melalauca', 'Melaleuca'],
@@ -133,10 +180,18 @@ function cleanTree(t) {
         ['Leptosprmum','Leptospermum'],
         ['Qurecus','Quercus'],
         ['Angpohora','Angophora'],
-        ['Pistachia','Pistacia']
+        ['Pistachia','Pistacia'],
+        ['Largerstromia', 'Largerstroemia'],
+        ['Casurina', 'Casuarina'],
+        ['Bizmarckia', 'Bismarckia'],
+        ['Mag.', 'Magnolia'], // lazy! :)
+        ['Quecus', 'Quercus'],
+        ['Symcareia', 'Syncarpia'], //!
+        ['Koelruteria','Koelreuteria'],
+        ['Euonomys', 'Euonymus'],
     ].forEach(a => {
         let [genusFrom, genusTo] = a;
-        if (t.genus.match(genusFrom)) {
+        if (t.genus === genusFrom) {
             t.genus = genusTo;
             t.scientific = '';
         }        
@@ -156,8 +211,10 @@ function cleanTree(t) {
 
     // \echo "Blank out non-assessed crown widths."
     
-    if (String(t.crown).match(/not assessed/i)) {
-        t.crown = undefined;
+    for (let field of ['crown','dbh','height','planted']) {
+        if (String(t[field]).match(/not assessed/i)) {
+            t[field] = undefined;
+        }
     }
     
     // -- TODO: handle all the dbh's that are ranges in mm.

@@ -1,0 +1,8 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="sydney">
+        <SrcDataSource>sydney.csv</SrcDataSource>
+        <GeometryType>wkbPoint</GeometryType>
+        <LayerSRS>EPSG:28356</LayerSRS>
+        <GeometryField encoding="PointFromColumns" x="feat_cent_east" y="feat_cent_north"/>
+    </OGRVRTLayer>
+</OGRVRTDataSource>

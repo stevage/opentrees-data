@@ -4,15 +4,25 @@
   "description": "",
   "main": "1-gettrees.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "tiles": "nodemon --ext mbtiles,json -- node_modules/tessera/bin/tessera.js -p 4011 mbtiles://./mbtiles/trees.mbtiles"
   },
   "author": "Steve Bennett <me@stevebennett.me> (http://stevebennett.me)",
   "license": "Apache-2.0",
   "dependencies": {
     "colors": "^1.1.2",
+    "d3-dsv": "^1.2.0",
     "download": "^5.0.2",
+    "execution-time": "^1.4.1",
     "extract-zip": "^1.6.6",
+    "fs-extra": "^8.1.0",
+    "fs-ndjson": "^1.1.0",
     "glob": "^7.1.2",
-    "jsonfile": "^4.0.0"
+    "jsonfile": "^4.0.0",
+    "make-dir": "^3.0.2",
+    "mapbox-upload": "^4.2.4",
+    "mbtiles": "^0.9.0",
+    "ndjson": "^1.5.0",
+    "tessera": "^0.14.1",
+    "tippecanoe": "^0.6.0"
   }
 }

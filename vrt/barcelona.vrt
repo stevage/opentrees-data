@@ -1,8 +1,0 @@
-<OGRVRTDataSource>
-    <OGRVRTLayer name="barcelona">
-        <SrcDataSource>barcelona.csv</SrcDataSource>
-        <GeometryType>wkbPoint</GeometryType>
-        <LayerSRS>EPSG:4326</LayerSRS>
-        <GeometryField encoding="PointFromColumns" x="LONGITUD_WGS84" y="LATITUD_WGS84"/>
-    </OGRVRTLayer>
-</OGRVRTDataSource>

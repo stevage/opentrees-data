@@ -11,7 +11,7 @@ function cleanTree(t) {
 
 
     // 'Remove vacant plantings'
-    const notPresentRegex = /\b(vacant planting|no tree|removed|destroyed)/i;
+    const notPresentRegex = /\b(vacant\b|no tree|removed|destroyed)/i;
     if (match(t.scientific, notPresentRegex) ||  match(t.description, notPresentRegex) || match(t.common, notPresentRegex)) {
         t._del = true;
         return;
@@ -130,7 +130,7 @@ function cleanTree(t) {
 
     [
         ['desmithiana', 'desmetiana'],
-        ['linarifolia','linariifolia'], // argh, it could be either linearfolia or linariifolia
+        ['linarifolia','linariifolia'], // argh, it could be either linearifolia or linariifolia
         ['linaifolia', 'linariifolia'],
         ['columellaris','columerauis'],
         ['bacculenta','bucculenta'],

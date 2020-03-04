@@ -12,7 +12,7 @@ const sources = require('./sources');
     }
 });
 
-
+let skipCount = 0;
 sources.forEach(function(source) {
     var urls = source.download;
     if (!Array.isArray(urls)) {
@@ -35,7 +35,7 @@ sources.forEach(function(source) {
                 console.log('Downloaded '.green + filename);
                 if (source.format === 'zip') {
                     console.log('Unzipping ' + filename);
-                    extract(filename, { dir: process.cwd() + '/data/unzip' }, function(err) {
+                    extract(filename, { dir: process.cwd() + `/data/unzip/${source.id}` }, function(err) {
                         if (err) {
                             console.error('Error unzipping '.error + filename + ': ' + err);
                         } else {
@@ -48,7 +48,9 @@ sources.forEach(function(source) {
                 console.error((filename + ': ').red + err);
             });
         } else {
-            console.log('(Skip ' + filename + ')');
+            skipCount++;
+            // console.log('(Skip ' + filename + ')');
         }
     });
 });
+console.log(`Skipped ${skipCount} sources that already existed on disk.`);

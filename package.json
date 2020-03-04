@@ -4,7 +4,9 @@
   "description": "",
   "main": "1-gettrees.js",
   "scripts": {
-    "tiles": "nodemon --ext mbtiles,json -- node_modules/tessera/bin/tessera.js -p 4011 mbtiles://./mbtiles/trees.mbtiles"
+    "tiles": "nodemon --watch mbtiles/trees.mbtiles -- node_modules/tessera/bin/tessera.js -p 4011 mbtiles://./mbtiles/trees.mbtiles",
+    "process": "./3-processFiles.js &&  ./3a-updateTaxoCount.js && ./3b-addSpeciesCounts.js", 
+    "export": "node ./export-sources.js; cp sources-out.json ../opentrees/src"
   },
   "author": "Steve Bennett <me@stevebennett.me> (http://stevebennett.me)",
   "license": "Apache-2.0",

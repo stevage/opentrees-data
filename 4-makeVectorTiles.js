@@ -2,6 +2,7 @@
 require('make-dir').sync('mbtiles');
 const tippecanoe = require('tippecanoe');
 const fs = require('fs');
+const child_process = require('child_process');
 const fields = {
     captured: 15,
     class: 15,
@@ -19,7 +20,7 @@ const fields = {
     planted: 15,
     ref: 13,
     scientific: 10,
-    source: 10,
+    source: 8,
     species: 1,
     species_count: 10,
     structure: 15,
@@ -40,7 +41,7 @@ const files = fs.readdirSync('out').filter(f => f.match(/\.geojson$/)).map(f => 
 tippecanoe(['tmp/allout.json'], {
     layer:'trees',
     force:true, 
-    output:'mbtiles/trees.mbtiles',
+    output:'mbtiles/trees-wip.mbtiles',
     minimumZoom: 1,
     maximumZoom: 15,
     baseZoom: 10,
@@ -56,3 +57,7 @@ tippecanoe(['tmp/allout.json'], {
         ])]
     }
 }, { echo: true });
+
+child_process.execSync('mv mbtiles/trees.mbtiles mbtiles/trees-old.mbtiles');
+child_process.execSync('mv mbtiles/trees-wip.mbtiles mbtiles/trees.mbtiles');
+console.log('Tiles now in mbtiles/trees.mbtiles');

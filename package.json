@@ -11,7 +11,7 @@
     "export": "node ./export-sources.js; cp sources-out.json ../opentrees/src"
   },
   "author": "Steve Bennett <me@stevebennett.me> (http://stevebennett.me)",
-  "license": "CC-BY-NC 4.0",
+  "license": "CC-BY-NC-4.0",
   "dependencies": {
     "colors": "^1.1.2",
     "d3-dsv": "^1.2.0",

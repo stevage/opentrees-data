@@ -56,7 +56,7 @@ sources.forEach(source => {
             console.log(`Loaded ${filename}`);
             console.log('Checking for null geometry');
             cmd=`head ${outname} | ndjson-filter '!d.geometry' 1>&2`;
-            console.log(cmd.cyan);
+            // console.log(cmd.cyan);
             child_process.execSync(cmd);
 
 

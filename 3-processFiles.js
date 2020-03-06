@@ -187,6 +187,7 @@ async function loadSource(source, out) {
                     keepCount,
                     delCount,
                     noGeomCount,
+                    differentSpecies: Object.keys(speciesCounts).length,
                     speciesCounts: Object.keys(speciesCounts)
                         .filter(species => speciesCounts[species] > keepCount / 100) // keep any species that is at least X% of the total
                         .map(species => [species, speciesCounts[species]])
@@ -201,11 +202,12 @@ async function loadSource(source, out) {
 
 }
 
+// TODO support writing each source to its own outfile then merging later.
 function loadSources(out) {
     require('make-dir').sync('out');
     return Promise.all(sources
-        // .filter(s => String(s.country).match(/Germany|Switz/))
-        .filter(s => s.id.match(/amsterdam|ochester/))
+        // .filter(s => String(s.country).match(/Canada/))
+        // .filter(s => s.id.match(/amsterdam|ochester/))
         // .filter(s => s.id === 'kelowna')
         // .filter(s => s.id === 'melbourne')
         .map(source => loadSource(source, out)));

@@ -5,6 +5,7 @@ const colors = require('colors');
 const download = require('download');
 const extract = require('extract-zip');
 const sources = require('./sources');
+const child_process = require('child_process');
 
 ['./data', './data/unzip', './tmp'].forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -35,14 +36,23 @@ sources.forEach(function(source) {
                 console.log('Downloaded '.green + filename);
                 if (source.format === 'zip') {
                     console.log('Unzipping ' + filename);
-                    extract(filename, { dir: process.cwd() + `/data/unzip/${source.id}` }, function(err) {
-                        if (err) {
-                            console.error('Error unzipping '.error + filename + ': ' + err);
-                        } else {
-                            console.log('Unzipped '.green + filename);
-                            // done...
-                        }
-                    });
+                    // extract(filename, { dir: process.cwd() + `/data/unzip/${source.id}` }, function(err) {
+                    //     if (err) {
+                    //         console.error('Error unzipping '.error + filename + ': ' + err);
+                    //     } else {
+                    //         console.log('Unzipped '.green + filename);
+                    //     }
+                    // });
+                    try {
+                        child_process.execSync(
+                            `unzip -d ${process.cwd()}/data/unzip/${source.id} "${filename}"`,
+                            { stdio: 'inherit' }
+                        );
+                        console.log('Unzipped '.green + filename);
+                    } catch (e) {
+                        console.error('Error unzipping '.error + filename + ': ' + err);
+                    }
+
                 }
             }).catch(function(err) {
                 console.error((filename + ': ').red + err);

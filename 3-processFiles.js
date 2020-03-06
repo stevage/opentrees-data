@@ -7,12 +7,16 @@ const jsonfile = require('jsonfile');
 const readJson = require ('util').promisify(jsonfile.readFile);
 const colors = require('colors');
 
-let sources = require('./sources');
 const cleanTree = require('./cleanTree');
 const taxa = require('./taxa');
 const ndjson = require('ndjson');
 const fsNdjson = require('fs-ndjson');
 const child_process = require('child_process');
+let sources = require('./sources');
+
+const sourceStats = require('./source-stats.json');
+sources.forEach(s => sourceStats[s.id] = sourceStats[s.id] || {});
+
 // sources = 'melbourne ballarat'.split(' ').map(x => ({ id: x }));
 
 //glob('out_*.geojson', {}, files => {
@@ -42,8 +46,6 @@ const identity = {
 }
 /* Given a GeoJSON feature, return a different one. */
 function processTree(source, tree) {
-    // let identity = {};
-    // Object.keys(src).forEach(p => identity[p] = p);
 
     const crosswalk = sources.find(s => s.id === source).crosswalk || {};
 
@@ -114,32 +116,43 @@ async function loadSource(source, out) {
     //     console.log(`Skipping ${outName}`);
     // }
     let keepCount = 0, delCount = 0, noGeomCount=0;
-    
+    let speciesCounts = {}; // per source counts
+
     return new Promise((resolve, reject) => {
         fs.createReadStream(`tmp/out_${source.id}.nd.geojson`)
             .pipe(ndjson.parse())
             .on('data', tree => {
                 try {
-                    if (source.id === 'oakland') {
-                        // dear god why
+                    if (source.coordsFunc) {
                         tree.geometry = {
                             type: 'Point',
-                            coordinates: tree.properties['Location 1'].split('\n').reverse()[0].split(/[(), ]/).filter(Number).map(Number).reverse()
+                            coordinates: source.coordsFunc(tree.properties)
                         }
-                        if (tree.geometry.coordinates.length < 1) {
+                        if (!tree.geometry.coordinates || tree.geometry.coordinates.length < 1) {
                             tree.geometry = null;
                         }
                     }
+                    
+                        // if (source.id === 'oakland') {
+                        //     // dear god why
+                        //     tree.geometry = {
+                        //         type: 'Point',
+                        //         coordinates: tree.properties['Location 1'].split('\n').reverse()[0].split(/[(), ]/).filter(Number).map(Number).reverse()
+                        //     }
+                        //     if (tree.geometry.coordinates.length < 1) {
+                        //         tree.geometry = null;
+                        //     }
+                        // }
                     if (!tree.geometry) {
                         noGeomCount ++;
                         return;
                     } else if (tree.geometry.type === 'Point') {
                         const [x, y] = tree.geometry.coordinates;
-                        if (!source.bounds) {
-                            source.bounds = [x, y, x, y];
+                        if (!sourceStats[source.id].bounds) {
+                            sourceStats[source.id].bounds = [x, y, x, y];
                         }
-                        const [x1, y1, x2, y2] = source.bounds;
-                        source.bounds = [Math.min(x, x1), Math.min(y, y1), Math.max(x, x2), Math.max(y, y2)];
+                        const [x1, y1, x2, y2] = sourceStats[source.id].bounds;
+                        sourceStats[source.id].bounds = [Math.min(x, x1), Math.min(y, y1), Math.max(x, x2), Math.max(y, y2)];
                     }
                     tree = processTree(source.id, tree);
                     cleanTree(tree.properties);
@@ -150,6 +163,10 @@ async function loadSource(source, out) {
                     addTaxa(tree.properties);
                     addSpeciesCount(tree.properties);
 
+                    if (tree.properties.genus && tree.properties.species) {
+                        speciesCounts[tree.properties.genus + ' ' + tree.properties.species] = 1 + (speciesCounts[tree.properties.genus + ' ' + tree.properties.species] || 0)
+                    }
+                
                     keepCount ++;
                     totalCount ++;
                     out.write(JSON.stringify(tree) + '\n');
@@ -165,6 +182,17 @@ async function loadSource(source, out) {
             })
             .on('end', () => {
                 console.log(`Processed ${keepCount} from ${source.id.cyan} (dropped ${delCount}, ${noGeomCount} had no geometry)`);
+                sourceStats[source.id] = {
+                    ...sourceStats[source.id],
+                    keepCount,
+                    delCount,
+                    noGeomCount,
+                    speciesCounts: Object.keys(speciesCounts)
+                        .filter(species => speciesCounts[species] > keepCount / 100) // keep any species that is at least X% of the total
+                        .map(species => [species, speciesCounts[species]])
+                        .sort(([a_, countA], [b, countB]) => countB - countA)
+                };
+                
 
                 resolve();
             })
@@ -176,22 +204,14 @@ async function loadSource(source, out) {
 function loadSources(out) {
     require('make-dir').sync('out');
     return Promise.all(sources
-        // .filter(s => s.id === 'nyc')
+        // .filter(s => String(s.country).match(/Germany|Switz/))
+        .filter(s => s.id.match(/amsterdam|ochester/))
+        // .filter(s => s.id === 'kelowna')
+        // .filter(s => s.id === 'melbourne')
         .map(source => loadSource(source, out)));
 }
 
 let totalCount = 0;
-function writeSources() {
-    const sourcesOut = sources.map(s => {
-        const os = JSON.parse(JSON.stringify(s));
-        for (const k of Object.keys(s.crosswalk || {})) {
-            os.crosswalk[k] = String(s.crosswalk[k])
-        }
-        return os;
-    });
-
-    fs.writeFileSync('sources-out.json', JSON.stringify(sourcesOut, null, 2));
-}
 async function process() {
     const outFile = fs.createWriteStream('tmp/allout.json').on('error', console.error);
     await loadSources(outFile);
@@ -205,11 +225,10 @@ async function process() {
         countries: [...(new Set(sources.map(s => s.country).filter(Boolean))).keys()]
     }
     fs.writeFileSync('./stats.json', JSON.stringify(stats));
+    fs.writeFileSync('./source-stats.json', JSON.stringify(sourceStats, null, 2));
     console.log(`${stats.openTrees.toLocaleString()} open data trees from ${stats.sources} sources.`);
     console.log('\nDone.');
-    writeSources();
-    child_process.execSync('cp stats.json ../opentrees/src');
-    child_process.execSync('cp sources-out.json ../opentrees/src');
+    require('./export-sources');
 }
 
 process();

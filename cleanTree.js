@@ -17,7 +17,7 @@ function cleanTree(t) {
         return;
     }
 
-    const unknownRegexp = /^(null$|Unidentified|Unknown|Not |To be|To define|not\b|tba)/i;
+    const unknownRegexp = /^(null$|Unidentified|Unknown|Not |To be|To define|not\b|tba|Ikke registreret|Não identificada)/i;
     if (match(t.scientific, unknownRegexp)) {
         t.description = t.scientific;
         t.scientific = t.genus = t.species = '';
@@ -219,6 +219,13 @@ function cleanTree(t) {
     
     // -- TODO: handle all the dbh's that are ranges in mm.
     // console.log(t.scientific);
+
+
+    if (t.maturity) {
+        let m = String(t.maturity);
+        m = m[0].toUpperCase() + m.slice(1).toLowerCase();
+        m = m.replace(/-/i, ' ').replace(/(Semi|Over) /, 'Semi-');
+    }
     return t;
     
 }

@@ -5,11 +5,13 @@
   "main": "1-gettrees.js",
   "scripts": {
     "tiles": "nodemon --watch mbtiles/trees.mbtiles -- node_modules/tessera/bin/tessera.js -p 4011 mbtiles://./mbtiles/trees.mbtiles",
+    "get": "./1-gettrees.js && ./2-loadtrees.js",
     "process": "./3-processFiles.js &&  ./3a-updateTaxoCount.js && ./3b-addSpeciesCounts.js", 
+    "full-upload": "./1-gettrees.js &&  ./2-loadtrees.js && ./3-processFiles.js &&  ./3a-updateTaxoCount.js && ./3b-addSpeciesCounts.js && ./4-makeVectorTiles.js && ./5-upload.js", 
     "export": "node ./export-sources.js; cp sources-out.json ../opentrees/src"
   },
   "author": "Steve Bennett <me@stevebennett.me> (http://stevebennett.me)",
-  "license": "Apache-2.0",
+  "license": "CC-BY-NC 4.0",
   "dependencies": {
     "colors": "^1.1.2",
     "d3-dsv": "^1.2.0",

@@ -16,7 +16,7 @@ const fields = {
     height: 13,
     id: 13,
     location: 15,
-    maturity: 15,
+    maturity: 12,
     planted: 15,
     ref: 13,
     scientific: 10,

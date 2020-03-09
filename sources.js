@@ -463,6 +463,7 @@ module.exports = [
     ...require('./sources/france'),
     ...require('./sources/usa'),
     ...require('./sources/germany'),
+    ...require('./sources/sweden'),
 ];
 
     /*

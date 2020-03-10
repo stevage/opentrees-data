@@ -532,6 +532,7 @@ const sources = [
     ...require('./sources/france'),
     ...require('./sources/usa'),
     ...require('./sources/germany'),
+    ...require('./sources/sweden'),
 ];
 
 module.exports = sources;

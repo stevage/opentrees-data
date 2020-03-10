@@ -132,6 +132,10 @@ async function loadSource(source, out) {
                             tree.geometry = null;
                         }
                     }
+                    if (source.delFunc && source.delFunc(tree.properties, tree)) {
+                        delCount ++;
+                        return;
+                    }
                     
                         // if (source.id === 'oakland') {
                         //     // dear god why
@@ -203,20 +207,35 @@ async function loadSource(source, out) {
 }
 
 // TODO support writing each source to its own outfile then merging later.
-function loadSources(out) {
+async function loadSources() {
+    let skipCount = 0;
     require('make-dir').sync('out');
-    return Promise.all(sources
-        // .filter(s => String(s.country).match(/Canada/))
-        // .filter(s => s.id.match(/amsterdam|ochester/))
-        // .filter(s => s.id === 'kelowna')
-        // .filter(s => s.id === 'melbourne')
-        .map(source => loadSource(source, out)));
+    // const outFile = fs.createWriteStream('tmp/allout.json').on('error', console.error);
+    await Promise.all(sources
+        // .filter(s => s.id.match(/haag/))
+        .map(source => {
+            const outName = `out/${source.id}.nd.geojson`
+            if (!fs.existsSync(outName)) {
+                let outFile = fs.createWriteStream(outName).on('error', console.error);
+                return loadSource(source, outFile);
+            } else {
+                skipCount ++
+            }
+        }))
+    console.log(`Skipped ${skipCount} sources.`);
+    return skipCount;
 }
+
+const perf = require('execution-time')();
+perf.start('process');
 
 let totalCount = 0;
 async function process() {
-    const outFile = fs.createWriteStream('tmp/allout.json').on('error', console.error);
-    await loadSources(outFile);
+    let skipped = await loadSources();
+    if (skipped > 0) {
+        console.log ('Not writing out stats tables due to skipped processing.');
+        return;
+    }
     console.log('Writing out: ');
     showBadSpeciesCounts();
     const notOpenCount = 31589; // Sydney
@@ -229,7 +248,7 @@ async function process() {
     fs.writeFileSync('./stats.json', JSON.stringify(stats));
     fs.writeFileSync('./source-stats.json', JSON.stringify(sourceStats, null, 2));
     console.log(`${stats.openTrees.toLocaleString()} open data trees from ${stats.sources} sources.`);
-    console.log('\nDone.');
+    console.log(`\nDone in ${perf.stop('process').words}.`);
     require('./export-sources');
 }
 

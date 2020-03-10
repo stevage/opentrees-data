@@ -92,7 +92,7 @@ module.exports = [
     {
         id:'berlin',
         country: 'Germany',
-        short: '',
+        short: 'Berlin',
         long: '',
         download: 'https://opendata.arcgis.com/datasets/05c3f9d7dea6422b86e30967811bddd7_0.zip',
         info:'',
@@ -143,6 +143,55 @@ module.exports = [
             owner:'zustaendig',
 
 
+        }
+    },
+    {
+        id:'rostock',
+        country: 'Germany',
+        short: 'Rostock',
+        long: 'Hanse- und Universitätsstadt Rostock',
+        download: 'https://geo.sv.rostock.de/download/opendata/baeume/baeume.csv',
+        info:'https://www.opendata-hro.de/dataset/baeume',
+        format: 'csv',
+        crosswalk: {
+            scientific: 'gattung_botanisch',
+            common: 'gattung_deutsch',
+            height: 'hoehe',
+            crown: 'kronendurchmesser',
+            dbh: 'stammdurchmesser',
+            location: 'allebaum',       
+        }
+    },
+    {
+        id:'chemnitz',
+        country: 'Germany',
+        short: 'Chemnitz',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/70330324e2364b209f7511ca20581f83_0.zip?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D',
+        info:'http://portal-chemnitz.opendata.arcgis.com/datasets/baeume?geometry=12.910%2C50.819%2C12.914%2C50.822',
+        format: 'zip',
+        crosswalk: {
+            ref: 'BaumNummer',
+            scientific: x => String(x.BaumArt).split(', ')[0],
+            common: x => String(x.BaumArt).split(', ')[1],
+            planted: 'PflanzDatu',
+        }
+    },
+    {
+        id:'wesel',
+        country: 'Germany',
+        short: 'Wesel',
+        long: '',
+        download: 'http://data.geoportal-wesel.de/OPENDATA/Baumkataster/Baumkataster.geojson',
+        info:'https://open.nrw/dataset/baumkataster-odp',
+        format: 'geojson',
+        crosswalk: {
+            ref: 'ID',
+            scientific: x => String(x.GA_LANG).split(', ')[0],
+            common: x => String(x.GA_LANG).split(', ')[1],
+            crown: 'KR_DURCHM',
+            dbh: 'ST_UMFANG',
+            height: 'BAUMHOEHE',
         }
     },
 ].map(s => {s.country = 'Germany'; return s; });

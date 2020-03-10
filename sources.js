@@ -1,4 +1,4 @@
-module.exports = [    
+const sources = [    
 
     {
         id: 'barcelona',
@@ -342,15 +342,15 @@ module.exports = [
         country: 'Switzerland',
         short: 'Basel',
         long: '',
-        download: 'https://opendata.arcgis.com/datasets/3f81c83f4f4548a8b619f605019e238d_1.zip',
-        info:'https://hub.arcgis.com/datasets/swissgeohub::baumbestand-baum',
+        download: 'https://data.bs.ch/explore/dataset/100052/download/?format=shp&timezone=Australia/Sydney&lang=en',
+        info:'https://data.bs.ch/explore/dataset/100052/information/',
         format: 'zip',
         crosswalk: {
-            scientific: x => String(x.ART).replace(/ \(.*/, ''),
-            common: x => (String(x.ART).match(/\((.*)\)/) || ['',''])[1],
-            planted: 'PFLANZDATU', 
-            age: 'BAUMALTER',
-            // STANDJAHR?
+            scientific: x => String(x.art).replace(/ \(.*/, ''),
+            common: x => (String(x.art).match(/\((.*)\)/) || ['',''])[1],
+            planted: 'pflanzdatu', 
+            age: 'baumalter',
+            // STANDJAHR? //
         }
     },
     
@@ -369,18 +369,18 @@ module.exports = [
             // lots of others...
         }
     },
-    {
-        id:'zurich',
-        country: 'Switzerland',
-        short: 'Zurich',
-        long: '',
-        download: 'https://www.ogd.stadt-zuerich.ch/geodaten/download/Baumkataster?format=10008',
-        info:'https://data.stadt-zuerich.ch/dataset/geo_baumkataster',
-        format: 'csv',
-        srs: 'EPSG:2056',
-        crosswalk: {
-        }
-    },
+    // { // requires email registration then subsequent download, blergh
+    //     id:'zurich',
+    //     country: 'Switzerland',
+    //     short: 'Zurich',
+    //     long: '',
+    //     download: 'https://www.ogd.stadt-zuerich.ch/geodaten/download/Baumkataster?format=10008',
+    //     info:'https://data.stadt-zuerich.ch/dataset/geo_baumkataster',
+    //     format: 'csv',
+    //     srs: 'EPSG:2056',
+    //     crosswalk: {
+    //     }
+    // },
     
     {
         id:'amsterdam1',
@@ -457,6 +457,75 @@ module.exports = [
         },
         primary: 'amsterdam1'
     },
+    {
+        id:'linz',
+        country: 'Austria',
+        short: 'Linz',
+        long: '',
+        download: 'http://data.linz.gv.at/katalog/umwelt/baumkataster/2020/FME_BaumdatenBearbeitet_OGD_20200225.csv',
+        info:'https://www.data.gv.at/katalog/dataset/baumkataster',
+        format: 'csv',
+        crosswalk: {
+            ref: 'BaumNr',
+            genus: 'Gattung',
+            species: x => x.Art !== '0' ? x.Art : undefined,
+            common: 'NameDeutsch',
+            height: 'Hoehe',
+            crown: 'Schirmdurchmesser',
+            dbh: 'Stammumfang',
+        }
+    },
+    {
+        id:'luxembourg',
+        country: 'Luxembourg',
+        short: 'Luxembourg',
+        long: 'Grand-Duchy of Luxembourg',
+        download: 'https://download.data.public.lu/resources/inspire-annex-i-theme-protected-sites-remarkable-trees/20200129-134525/ps.protectedsitesnatureconservation-trees.gml',
+        info:'https://catalog.inspire.geoportail.lu/geonetwork/srv/eng/catalog.search#/metadata/bf367452-c965-4ae1-b652-bd2c86400be5',
+        format: 'gml',
+        crosswalk: {
+            ref: 'localId',
+            scientific: x => String(x.text).split(' - ')[0],
+            common: x => String(x.text).split(' - ')[1],
+
+        }
+    },
+    {
+        id:'haag',
+        country: 'Netherlands',
+        short: 'Den Haag',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/dd3873f6-b2d0-42e8-94c7-f7b47dcb71f0/resource/7ac8ba4a-586e-43f2-b12e-014079c83f00/download/bomen-csv.zip',
+        info:'https://data.overheid.nl/dataset/bomen-csv',
+        format: 'csv',
+        zip: true,
+        latitudeField:'LAT',
+        longitudeField:'LONG',
+        crosswalk: {
+            ref: 'BOOMNUMMER',
+            scientific: 'BOOMSOORT_WETENSCHAPPELIJ',
+            dbh: 'STAMDIAMETERKLASSE',
+            maturity:'LEEFTIJDSKLASSE',
+            age: 'LEEFTIJD', 
+            owner: 'EIGENAAR'
+        },
+        centre: [4.2777,52.0642],
+    },
+    {
+        id:'chile-osm',
+        country: 'Chile',
+        short: 'Chile (OSM)',
+        long: '',
+        download: 'https://emscycletours.site44.com/opentrees-data/chile.geojson',
+        info:'',
+        format: '',
+        crosswalk: {
+            common: 'name',
+
+            //leaf_cycle, leaf_type
+        },
+        centre: [-70.877,-29.859],
+    },
 
     ...require('./sources/canada'),
     ...require('./sources/australia'),
@@ -465,9 +534,15 @@ module.exports = [
     ...require('./sources/germany'),
 ];
 
+module.exports = sources;
+// module.exports = sources.filter(x => x.id === 'cupertino')
+// module.exports = require('./sources/usa').slice(require('./sources/usa').findIndex(x => x.id === 'anaheim_ca'))
+
     /*
     TODO: Belgium (Wallonne) - http://hub.arcgis.com/datasets/esribeluxdata::arbres-et-groupes-darbres?geometry=3.373%2C50.114%2C5.989%2C50.421
      - some are 'groups of trees' which is ugly
+
+     Esri "community data": - http://hub.arcgis.com/datasets/esri::trees/data
 
     */
     /*{

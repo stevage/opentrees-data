@@ -1,5 +1,5 @@
 function match(s, regex) {
-    return s && s.match(regex);
+    return s && String(s).match(regex);
 }
 
 
@@ -11,13 +11,14 @@ function cleanTree(t) {
 
 
     // 'Remove vacant plantings'
-    const notPresentRegex = /\b(vacant\b|no tree|removed|destroyed)/i;
-    if (match(t.scientific, notPresentRegex) ||  match(t.description, notPresentRegex) || match(t.common, notPresentRegex)) {
+    const notPresentRegex = /\b(vacant\b|no tree|removed|destroyed|proposed|planting site)/i;
+    // may capture false positives, "to be removed"?
+    if (['scientific','description','common','health'].find(field => match(t[field], notPresentRegex))) {
         t._del = true;
         return;
     }
 
-    const unknownRegexp = /^(null$|Unidentified|Unknown|Not |To be|To define|not\b|tba|Ikke registreret|Não identificada)/i;
+    const unknownRegexp = /^(null$|Unidentified|Unknown|Not |To be|To define|not\b|tba|Ikke registreret|Não identificada|Autre espèce|Hedge start|Hedge end|var$)/i;
     if (match(t.scientific, unknownRegexp)) {
         t.description = t.scientific;
         t.scientific = t.genus = t.species = '';
@@ -216,6 +217,13 @@ function cleanTree(t) {
             t[field] = undefined;
         }
     }
+
+    for (let field of ['health','maturity']) {
+        if (String(t[field]).match(/^(Unassigned|Null|Unknown| |N\/A|NA$)$/i)) {
+            t[field] = undefined;
+        }
+    }
+    // TODO: titlecase fields, so FAIR => Fair ?
     
     // -- TODO: handle all the dbh's that are ranges in mm.
     // console.log(t.scientific);
@@ -226,7 +234,18 @@ function cleanTree(t) {
         m = m[0].toUpperCase() + m.slice(1).toLowerCase();
         m = m.replace(/-/i, ' ').replace(/(Semi|Over) /, 'Semi-');
     }
+
+    if (t.planted) {
+        const m = match(t.planted, /(19|20)\d\d/);
+        t.plantedYear = m && m[0];
+    }
+
+    
+
+
     return t;
+
+
     
 }
 module.exports = cleanTree;

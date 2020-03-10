@@ -6,6 +6,7 @@ const download = require('download');
 const extract = require('extract-zip');
 const sources = require('./sources');
 const child_process = require('child_process');
+const { match } = require('./utils');
 
 ['./data', './data/unzip', './tmp'].forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -21,7 +22,12 @@ sources.forEach(function(source) {
     }
     urls.forEach(url => {
         // hmm, 'format' is used for saving the file, but also knowing what file to import.
-        var format = source.format;
+        var format = source.zip ? 'zip' : source.format;
+        if (!format) {
+            format = match(url, /\.([a-z]+)$/, 1);
+        }
+
+            
         if (source.keepExtension) {
             format = url.match(/\.([^.]+)$/)[1];
         }
@@ -34,7 +40,7 @@ sources.forEach(function(source) {
             download(url).then(data => {
                 fs.writeFileSync(filename, data);            
                 console.log('Downloaded '.green + filename);
-                if (source.format === 'zip') {
+                if (format === 'zip' || source.zip) {
                     console.log('Unzipping ' + filename);
                     // extract(filename, { dir: process.cwd() + `/data/unzip/${source.id}` }, function(err) {
                     //     if (err) {

@@ -1,0 +1,8 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="20180921_Baeume_OpenMap">
+        <SrcDataSource>ulm.xlsx</SrcDataSource>
+        <GeometryType>wkbPoint</GeometryType>
+        <LayerSRS>EPSG:4326</LayerSRS>
+        <GeometryField encoding="PointFromColumns" x="Koordinaten_X_Y" y="Koordinate_Y"/>
+    </OGRVRTLayer>
+</OGRVRTDataSource>

@@ -12,8 +12,25 @@ const optionList = [
 ];
 require('colors');
 let options;
+function help() {
+    console.log(require('command-line-usage')([
+        {
+            header: require('path').basename(process.argv[1]),
+            content: 'Convert geojson files to vector tiles.',
+
+        }, {
+            header: 'Usage',
+            optionList
+        }
+    ]));
+}
+
 try {
     options = require('command-line-args')(optionList);
+    if (options.help) {
+        help();
+        process.exit(0);
+    }    
 } catch (e) {
     console.error(`Error: ${e.name.red} ${e.optionName || ''}` );
     help();
@@ -51,18 +68,6 @@ const fields = {
     variety: 13
 }
 
-function help() {
-    console.log(require('command-line-usage')([
-        {
-            header: require('path').basename(process.argv[1]),
-            content: 'Convert geojson files to vector tiles.',
-
-        }, {
-            header: 'Usage',
-            optionList
-        }
-    ]));
-}
 function makeTiles(input, output) {
     tippecanoe(input, {
         // tippecanoe(['tmp/allout.json'], {
@@ -86,11 +91,6 @@ function makeTiles(input, output) {
         }, { echo: true });
 }        
 
-if (options.help) {
-    help();
-    process.exit(0);
-}
-
 
 const files = fs.readdirSync('out').filter(f => f.match(/\.geojson$/));
 
@@ -112,8 +112,8 @@ if (options['separate-mbtiles'] || options['just-join']) {
 
 
 } else if (options['single-source']) {
-    console.log('Generating a single mbtiles file from allout.geojson.');
-    makeTiles(['tmp/allout.geojson'], 'mbtiles/trees-wip.mbtiles');
+    console.log('Generating a single mbtiles file from allout.json.');
+    makeTiles(['tmp/allout.json'], 'mbtiles/trees-wip.mbtiles');
     child_process.execSync('mv mbtiles/trees.mbtiles mbtiles/trees-old.mbtiles');
     child_process.execSync('mv mbtiles/trees-wip.mbtiles mbtiles/trees.mbtiles');
     console.log('Tiles now in mbtiles/trees.mbtiles');

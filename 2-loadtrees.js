@@ -25,9 +25,13 @@ sources.forEach(source => {
     try {
         filename = source.filename || `${source.id}.${source.format}`;
         if (source.format === 'csv') {
-            extraFields = `-s_srs ${source.srs || 'EPSG:4326'} `            
+            source.srs = source.srs || 'EPSG:4326';
             extraFields += `-oo GEOM_POSSIBLE_NAMES=the_geom,SHAPE,wkb_geometry,geo_shape -oo Y_POSSIBLE_NAMES=${source.latitudeField || 'Latitude,Lat,LAT,Y,Y_LAT,lat,Y_Koordina'} -oo X_POSSIBLE_NAMES=${source.longitudeField || 'Longitude,Lon,Lng,LONG,X,X_LONG,long,X_Koordina'} `;
         }
+        if (source.srs) {
+            extraFields = `-s_srs ${source.srs} ${extraFields}`
+        }
+
         // ideally we'd redo all the "format: zip" as "format: shp, zip: true". or even just assume zip is true for shp.
         if (source.format === 'zip' || source.zip) {
             if (!source.filename) {

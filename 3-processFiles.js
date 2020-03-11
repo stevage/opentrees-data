@@ -12,6 +12,42 @@ const taxa = require('./taxa');
 const ndjson = require('ndjson');
 const fsNdjson = require('fs-ndjson');
 const child_process = require('child_process');
+
+
+const optionList = [
+    { name: 'allout', type: Boolean, defaultValue: false, description: 'Use a combined allout.geojson file' },
+    { name: 'help', type: Boolean, alias: 'h' },
+
+];
+let options;
+function help() {
+    console.log(require('command-line-usage')([
+        {
+            header: require('path').basename(process.argv[1]),
+            content: 'Convert geojson files to vector tiles.',
+
+        }, {
+            header: 'Usage',
+            optionList
+        }
+    ]));
+}
+
+try {
+    options = require('command-line-args')(optionList);
+    if (options.help) {
+        help();
+        process.exit(0);
+    }    
+} catch (e) {
+    console.error(`Error: ${e.name.red} ${e.optionName || ''}` );
+    help();
+    process.exit(1);
+}
+
+
+
+
 let sources = require('./sources');
 
 const sourceStats = require('./source-stats.json');
@@ -101,7 +137,7 @@ function showBadSpeciesCounts() {
 };
 
 
-console.log('Combining temporary files in tmp/out_* into processed tmp/allout.json');
+console.log(`Combining temporary files in tmp/out_* into ${options.allout ? 'tmp/allout.json' : 'out/*.nd.geojson'}`);
 let taxoCount = { class: {}, subclass: {}, family: {}, genus: {}, species: {} };
 
 try {
@@ -206,20 +242,29 @@ async function loadSource(source, out) {
 
 }
 
+
 // TODO support writing each source to its own outfile then merging later.
 async function loadSources() {
     let skipCount = 0;
     require('make-dir').sync('out');
-    // const outFile = fs.createWriteStream('tmp/allout.json').on('error', console.error);
+    let outFile;
+    if (options.allout) {
+        outFile = fs.createWriteStream('tmp/allout.json').on('error', console.error);
+    }
     await Promise.all(sources
         // .filter(s => s.id.match(/haag/))
         .map(source => {
-            const outName = `out/${source.id}.nd.geojson`
-            if (!fs.existsSync(outName)) {
-                let outFile = fs.createWriteStream(outName).on('error', console.error);
+            if (options.allout) {
                 return loadSource(source, outFile);
             } else {
-                skipCount ++
+                const outName = `out/${source.id}.nd.geojson`
+                
+                if (!fs.existsSync(outName)) {
+                    const localOutfile = fs.createWriteStream(outName).on('error', console.error);
+                    return loadSource(source, localOutfile);
+                } else {
+                    skipCount ++
+                }
             }
         }))
     console.log(`Skipped ${skipCount} sources.`);

@@ -194,4 +194,54 @@ module.exports = [
             height: 'BAUMHOEHE',
         }
     },
+    {
+        id:'ulm',
+        short: 'Ulm',
+        long: '',
+        download: 'http://daten.ulm.de/sites/default/files/20180921_Baeume_1.xlsx',
+        info:'http://www.daten.ulm.de/datenkatalog/metadaten/baumbestand-stadt-ulm-testdatensatz',
+        format: 'xlsx',
+        filename: 'ulm.vrt',
+        srs: 'EPSG:31467', // or 2166, 31467, 3396...
+        gdal_options: '-skipfailures',
+        crosswalk: {
+            scientific: 'Baumart_botanisch',
+            common: 'Baumart',
+            height: 'Baumhöhe_(aktuell)',
+            crown: 'Kronendurchm_(aktuell)',
+            // dbh: 'Stammumfang_(aktuell)',
+            dbh: 'Stammdurchm_(aktuell)',
+            health: 'Vitalitaetsstatus_(aktuell)', // needs processing?
+            planted: 'Pflanzjahr_geschaetzt',
+            updated: 'Standortermittlung_am', // "location determination"
+
+        },
+        centre: [10,48.4]
+    },
+    {
+        id:'hamburg',
+        country: 'Germany',
+        short: 'Hamburg',
+        // long: '',
+        download: 'http://daten-hamburg.de/umwelt_klima/strassenbaumkataster/Strassenbaumkataster_HH_2019-06-19.zip',
+        // info:'',
+        format: 'zip',
+        filename: 'Strassenbaumkataster_HH_2019-06-19.gml',
+        crosswalk: {
+            ref: 'baumid',
+            scientific: 'art_latein',
+            common: 'art_deutsch',
+            planted: 'pflanzjahr',
+            // kronendurchmesser
+            dbh: 'stammumfang', // TODO verify
+            //
+        }
+        /*
+        TODO investigate
+        BERROR 1: Layer 'strassenbaumkataster_hpa' does not already exist in the output dataset, and cannot be created by the output driver.
+        ERROR 1: Terminating translation prematurely after failed
+        translation of layer strassenbaumkataster_hpa (use -skipfailures to skip errors)
+        Error with unzip/hamburg/Strassenbaumkataster_HH_2019-06-19.gml (hamburg)
+        */
+    },
 ].map(s => {s.country = 'Germany'; return s; });

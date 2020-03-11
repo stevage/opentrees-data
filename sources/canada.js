@@ -352,7 +352,7 @@ module.exports = [
         download: 'https://opendata.arcgis.com/datasets/c5d5ff5351a54fdb8d3934abbb5cda9a_8.zip',
         info:'http://hub.arcgis.com/datasets/TownofAjax::town-trees',
         format: 'zip',
-        delFunc: X => x.STATUS==='REMOVED', /// TODO implement
+        delFunc: x => x.STATUS==='REMOVED', /// TODO implement
         crosswalk: {
             dbh: 'DBH',
             common: 'TYPE',

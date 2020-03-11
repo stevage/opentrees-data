@@ -1,3 +1,46 @@
+/*
+Schema (incomplete):
+id (required): internal identifier used in naming files and linking things.
+short: Short name for the city, shown on the map (eg Melbourne)
+long: Full name for the government body (eg City of Melbourne)
+download (required): URL to get data from
+info: URL that is the landing page for more information about dataset
+format: The file extension, eg zip/geojson/csv. Not required if present in download URL.
+filename: If the specific file to pass to OGR2OGR needs to be set. Useful for complex zip files, or vrt files.
+latitudeField,longitudeField: for csv files, the specific fields containing lat/long. Can usually be guessed, so not required.
+license: SPDX specifier for license (eg CC-BY-4.0)
+crosswalk: set of fields that map to opentrees schema. If a function is given, it's called with geojson properties object.
+country: name of country the source is within.
+srs: Source SRS if not EPSG:4326 or available within Shapefile .prj file. Passed to ogr2ogr as -s_srs
+gdal_options: String, other options to pass to ogr2ogr, eg "-skipfailures"
+delFunc: called with (tree.properties, tree) for each row. If it returns true, that row is excluded.
+
+
+Crosswalk (opentrees schema):
+scientific: full botanical name
+genus: scientific genus (eg Melaleuca)
+species: species epithet (eg linariifolia)
+variety: everything that comes after species, including cultivar, variety etc.
+common: Common name (eg "Brittle gum")
+dbh: diameter at breast height, in centimetres
+health: rating of health of tree, ideally in Dead/Poor/Fair/Good/Very good/Excellent
+height: height of tree in metres
+crown: width of crown, in metres
+spread: crown spread, in metres (TODO reconcile this and crown)
+ule: useful life expectancy, in years (TODO a better way of doing this with absolute years)
+updated: date that data was last updated (TOOD distinguish between various kinds of updates maybe)
+planted: Date that tree was planted as a seed (not used much - need to be clearer about semantics and date format)
+
+
+Future fields:
+- installation date?
+
+
+
+
+
+*/
+
 const sources = [    
 
     {
@@ -20,93 +63,7 @@ const sources = [
         },
 
     },
-    {
-        id: 'london',
-        download: 'https://data.london.gov.uk/download/local-authority-maintained-trees/c52e733d-bf7e-44b8-9c97-827cb2bc53be/london_street_trees_gla_20180214.csv',
-        format: 'csv',
-        short: 'London',
-        long: 'Greater London Authority',
-        country: 'UK',
-        centre: [-0.1051, 51.5164],
-
-        crosswalk: {
-            ref: 'gla_id',
-            scientific: 'species_name',
-            common: 'common_name',
-            description: 'display_name',
-            //gla_id,borough,species_name,common_name,display_name,load_date,easting,northing,longitude,latitude
-
-        },
-    },
-    {
-        id: 'birmingham',
-        download: 'https://cc-p-birmingham.ckan.io/dataset/e9c314fc-fb6d-4189-a19c-7eec962733a8/resource/4bfd9191-a520-42fb-9ebf-8fefaededf6c/download/trees-dec2016.csv',
-        format: 'csv',
-        short: 'Birmingham',
-        country: 'UK',
-        crosswalk: {
-            scientific: 'species',
-            maturity: 'age',
-            height: 'height',
-            location: 'site_name',
-        }
-
-    },
-    {
-        id: 'bristol',
-        country: 'UK',
-        download: 'https://opendata.bristol.gov.uk/explore/dataset/trees/download/?format=geojson&timezone=Australia/Sydney&lang=en',
-        info: 'https://opendata.bristol.gov.uk/explore/dataset/trees/export/',
-        format: 'geojson',
-        crosswalk: {
-            dbh: 'dbh',
-            height: 'crown_height',
-            common: 'common_name',
-            scientific: 'latin_name',
-            common: 'full_common_name',
-            crown: x => x['crown_width'],
-
-        },
-        short: 'Bristol',
-    },
-
-
-    {
-        id: 'vienna',
-        country: 'Austria',
-        // downloads soooo slowly
-        download: 'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:BAUMKATOGD&srsName=EPSG:4326&outputFormat=csv',
-        info:'https://www.data.gv.at/katalog/dataset/c91a4635-8b7d-43fe-9b27-d95dec8392a7',
-        format: 'csv',
-        short: 'Vienna',
-        crosswalk: {
-            ref: 'BAUM_ID',
-            dbh: x => x.STAMMUNGFANG / 3.14159 * 2,
-            height: 'BAUMHOEHE',
-            scientific: 'GATTUNG_ART',
-            crown: 'KRONENDURCHMESSER',
-            
-
-        }
-    },
-    {
-        id: 'belfast',
-        country: 'UK',
-        download: 'https://www.belfastcity.gov.uk/nmsruntime/saveasdialog.aspx?lID=14543&sID=2430',
-        info:'https://www.belfastcity.gov.uk/council/Openandlinkeddata/opendatasets.aspx',
-        format: 'csv',
-        short: 'Belfast',
-        crosswalk: {
-            location: 'TYPEOFTREE',
-            common: 'SPECIESTYPE',
-            scientific: 'SPECIES',
-            maturity: 'AGE',
-            health: 'CONDITION',
-            dbh: 'DIAMETERinCENTIMETRES',
-            spread: 'SPREADRADIUSinMETRES',
-            height: 'TREEHEIGHTinMETRES'
-        }
-    },
+    
     {
         id:'copenhagen',
         country: 'Denmark',
@@ -166,32 +123,7 @@ const sources = [
         },
         primary: 'buenos_aires'
     },
-    {
-        id:'hamburg',
-        country: 'Germany',
-        short: 'Hamburg',
-        // long: '',
-        download: 'http://daten-hamburg.de/umwelt_klima/strassenbaumkataster/Strassenbaumkataster_HH_2019-06-19.zip',
-        // info:'',
-        format: 'zip',
-        filename: 'Strassenbaumkataster_HH_2019-06-19.gml',
-        crosswalk: {
-            ref: 'baumid',
-            scientific: 'art_latein',
-            common: 'art_deutsch',
-            planted: 'pflanzjahr',
-            // kronendurchmesser
-            dbh: 'stammumfang', // TODO verify
-            //
-        }
-        /*
-        TODO investigate
-        BERROR 1: Layer 'strassenbaumkataster_hpa' does not already exist in the output dataset, and cannot be created by the output driver.
-        ERROR 1: Terminating translation prematurely after failed
-        translation of layer strassenbaumkataster_hpa (use -skipfailures to skip errors)
-        Error with unzip/hamburg/Strassenbaumkataster_HH_2019-06-19.gml (hamburg)
-        */
-    },
+    
     {
         id:'santiago',
         country: 'Spain',
@@ -237,90 +169,7 @@ const sources = [
             health: 'Condition',
         }
     },
-    {
-        id:'edinburgh',
-        country: 'UK',
-        short: 'Edinburgh',
-        long: '',
-        download: 'https://data.edinburghcouncilmaps.info/datasets/4dfc8f18a40346009b9fc32cbee34039_39.zip',
-        info:'https://data.edinburghcouncilmaps.info/datasets/4dfc8f18a40346009b9fc32cbee34039_39',
-        format: 'zip',
-        crosswalk: {
-            scientific: 'LatinName',
-            common: 'CommonName',
-            height: 'Height',
-            spread: 'Spread',
-            maturity: 'AgeGroup',
-            bh: 'DiameterAt',
-
-
-        }
-    },
-    {
-        id:'dundee',
-        country: 'UK',
-        short: 'Dundee',
-        long: 'Dundee City Council',
-        download: 'https://data.dundeecity.gov.uk/datastore/dump/e54ef90a-76e5-415e-a272-5e489d9f5c67',
-        info:'https://data.dundeecity.gov.uk/dataset/trees',
-        format: 'csv',
-        crosswalk: {
-            ref: 'TREE_NUMBER',
-            height: 'HEIGHT_M',
-            circumference: 'GIRTH',
-            maturity: 'AGE_CLASS',
-            scientific: 'SCIENTIFIC_NAME',
-            common: 'POPULAR_NAME',
-
-        }
-    },
-    {
-        id:'york',
-        country: 'UK',
-        short: 'York',
-        long: 'City of York Council',
-        download: 'https://opendata.arcgis.com/datasets/30f38f358843467daa2d93074a03b8d5_3.csv',
-        info:'https://data.gov.uk/dataset/12dcc527-a7e2-4b23-a3c5-1501053ff0f5/council-owned-trees',
-        format: 'csv',
-        crosswalk: {
-            ref: 'TREEID',
-            scientific: 'BOTANICAL',
-            common: 'SPECIES',
-
-        }
-    },
-    {
-        id:'york-private',
-        country: 'UK',
-        short: 'York',
-        long: '',
-        download: 'https://opendata.arcgis.com/datasets/a602aca10afb49659720b435d3f54023_18.csv',
-        info:'https://data.gov.uk/dataset/c166b067-5a9d-487b-a37d-4d350f8cff51/private-trees',
-        format: 'csv',
-        crosswalk: {
-            owner: 'OWNER',
-            common: 'SPECIES',
-            scientific: 'BOTANICAL',
-        },
-        primary: 'york',
-    },
-
-  
-    {
-        id:'umea',
-        country: 'Sweden',
-        short: 'Umea',
-        long: '',
-        download: 'https://opendata.umea.se/explore/dataset/trad-som-forvaltas-av-gator-och-parker/download/?format=shp&timezone=Europe/Stockholm&lang=en',
-        info:'https://opendata.umea.se/explore/dataset/trad-som-forvaltas-av-gator-och-parker/export/?disjunctive.tradart_vetenskap_namn_1_1_2&disjunctive.tradart_svenskt_namn_1_1_3',
-        format: 'zip',
-        crosswalk: {
-            scientific: 'tradart_vet',
-            common: 'tradart_sve',
-            location: 'gatu_eller',
-            date: 'planterings',
-        }
-    },
+    
     {
         id:'palmerston_north',
         country: 'New Zealand',
@@ -382,86 +231,31 @@ const sources = [
     //     }
     // },
     
+    
     {
-        id:'amsterdam1',
-        country: 'Netherlands',
-        short: 'Amsterdam',
-        long: 'Gemeente Amsterdam',
-        download: 'https://maps.amsterdam.nl/open_geodata/excel.php?KAARTLAAG=BOMEN&THEMA=bomen1',
-        info:'https://maps.amsterdam.nl/open_geodata/?k=254',
+        id: 'vienna',
+        country: 'Austria',
+        // downloads soooo slowly
+        download: 'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:BAUMKATOGD&srsName=EPSG:4326&outputFormat=csv',
+        info:'https://www.data.gv.at/katalog/dataset/c91a4635-8b7d-43fe-9b27-d95dec8392a7',
         format: 'csv',
+        short: 'Vienna',
         crosswalk: {
-            common: 'Soortnaam_NL',
-            scientific: 'Soortnaam_WTS',
-            location: 'Boomtype',
-            height: 'Boomhoogte',
-            planted: 'Plantjaar',
-            owner: 'Eigenaar',
-
-
-        }
-    },
-    {
-        id:'amsterdam2',
-        country: 'Netherlands',
-        short: 'Amsterdam',
-        long: 'Gemeente Amsterdam',
-        download: 'https://maps.amsterdam.nl/open_geodata/excel.php?KAARTLAAG=BOMEN&THEMA=bomen2',
-        info:'https://maps.amsterdam.nl/open_geodata/?k=255',
-        format: 'csv',
-        crosswalk: {
-            common: 'Soortnaam_NL',
-            scientific: 'Soortnaam_WTS',
-            location: 'Boomtype',
-            height: 'Boomhoogte',
-            planted: 'Plantjaar',
-            owner: 'Eigenaar',
+            ref: 'BAUM_ID',
+            dbh: x => x.STAMMUNGFANG / 3.14159 * 2,
+            height: 'BAUMHOEHE',
+            scientific: 'GATTUNG_ART',
+            crown: 'KRONENDURCHMESSER',
         },
-        primary: 'amsterdam1'
+        license:'CC-BY-4.0' 
+
     },
 
-    {
-        id:'amsterdam3',
-        country: 'Netherlands',
-        short: 'Amsterdam',
-        long: 'Gemeente Amsterdam',
-        download: 'https://maps.amsterdam.nl/open_geodata/excel.php?KAARTLAAG=BOMEN&THEMA=bomen3',
-        info:'https://maps.amsterdam.nl/open_geodata/?k=256',
-        format: 'csv',
-        crosswalk: {
-            common: 'Soortnaam_NL',
-            scientific: 'Soortnaam_WTS',
-            location: 'Boomtype',
-            height: 'Boomhoogte',
-            planted: 'Plantjaar',
-            owner: 'Eigenaar',
-        },
-        primary: 'amsterdam1'
-    },
-
-    {
-        id:'amsterdam4',
-        country: 'Netherlands',
-        short: 'Amsterdam',
-        long: 'Gemeente Amsterdam',
-        download: 'https://maps.amsterdam.nl/open_geodata/excel.php?KAARTLAAG=BOMEN&THEMA=bomen4',
-        info:'https://maps.amsterdam.nl/open_geodata/?k=257',
-        format: 'csv',
-        crosswalk: {
-            common: 'Soortnaam_NL',
-            scientific: 'Soortnaam_WTS',
-            location: 'Boomtype',
-            height: 'Boomhoogte',
-            planted: 'Plantjaar',
-            owner: 'Eigenaar',
-        },
-        primary: 'amsterdam1'
-    },
     {
         id:'linz',
         country: 'Austria',
         short: 'Linz',
-        long: '',
+        long: 'City of Linz',
         download: 'http://data.linz.gv.at/katalog/umwelt/baumkataster/2020/FME_BaumdatenBearbeitet_OGD_20200225.csv',
         info:'https://www.data.gv.at/katalog/dataset/baumkataster',
         format: 'csv',
@@ -473,7 +267,8 @@ const sources = [
             height: 'Hoehe',
             crown: 'Schirmdurchmesser',
             dbh: 'Stammumfang',
-        }
+        },
+        license:'CC-BY-4.0' 
     },
     {
         id:'luxembourg',
@@ -490,27 +285,7 @@ const sources = [
 
         }
     },
-    {
-        id:'haag',
-        country: 'Netherlands',
-        short: 'Den Haag',
-        long: '',
-        download: 'https://ckan.dataplatform.nl/dataset/dd3873f6-b2d0-42e8-94c7-f7b47dcb71f0/resource/7ac8ba4a-586e-43f2-b12e-014079c83f00/download/bomen-csv.zip',
-        info:'https://data.overheid.nl/dataset/bomen-csv',
-        format: 'csv',
-        zip: true,
-        latitudeField:'LAT',
-        longitudeField:'LONG',
-        crosswalk: {
-            ref: 'BOOMNUMMER',
-            scientific: 'BOOMSOORT_WETENSCHAPPELIJ',
-            dbh: 'STAMDIAMETERKLASSE',
-            maturity:'LEEFTIJDSKLASSE',
-            age: 'LEEFTIJD', 
-            owner: 'EIGENAAR'
-        },
-        centre: [4.2777,52.0642],
-    },
+
     {
         id:'chile-osm',
         country: 'Chile',
@@ -526,13 +301,29 @@ const sources = [
         },
         centre: [-70.877,-29.859],
     },
+        
+    {
+        id:'antwerpen_be',
+        country: 'Belgium',
+        short: 'Antwerp',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/0293af55ca454b44ba789ee14c82543a_676.zip',
+        info:'https://portaal-stadantwerpen.opendata.arcgis.com/datasets/boom/data',
+        crosswalk: {
+            scientific: 'LATBOOMSOO',
+            dbh: 'STAMOMTREK',
+            ref: 'ANTW_ID',
 
+        }
+    },
     ...require('./sources/canada'),
     ...require('./sources/australia'),
     ...require('./sources/france'),
     ...require('./sources/usa'),
     ...require('./sources/germany'),
     ...require('./sources/sweden'),
+    ...require('./sources/uk'),
+    ...require('./sources/netherlands'),
 ];
 
 module.exports = sources;

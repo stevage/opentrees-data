@@ -169,5 +169,233 @@ module.exports = [
             owner: 'BEHEERDER',
 
         }
-    },    
-]
+    },
+    {
+        id:'dordrecht_nl',
+        short: 'Dordrecht',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/4c1cd59b-1057-4d47-bd84-f67a9cfd0f27/resource/94612e3e-eaac-4ac4-8db1-cdda2bdf361c/download/allebomendordrecht-2016-sep-2.csv',
+        // there's also another one... I think this is the superset?
+        info:'https://data.overheid.nl/dataset/bomen-dordrecht',
+        crosswalk: {
+            ref: 'ELEMENTNUMMER',
+            scientific: 'SRT_NAAM',
+            common: 'Nederlandse naam',
+            height: 'HOOGTE',
+            dbh: 'DIAMETER',
+            installed: 'AANLEGJAAR', //"introduction year"
+            owner: 'EIGENDOM',
+
+
+        },
+        license: 'CC0-1.0',
+        centre: [4.670, 51.806],
+    }, 
+    {
+        id:'lelystad_nl',
+        short: 'Lelystad',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/a510615b-165d-442a-8956-1df78feb321e/resource/c6950c16-dff5-40b4-b1b5-0b2a2dffb382/download/bomen.csv',
+        info:'https://data.overheid.nl/dataset/bomen-lelystad',
+        crosswalk: {
+            common: 'SOORT_NED',
+            scientific: 'SOORT_LATIJN',
+            height: 'HOOGTE',
+            health: 'CONDITIE',
+            updated: 'INSPECTIEDATUM'
+        },
+        license: 'CC-BY-4.0',
+        centre: [5.478, 52.509],
+    },
+    {
+        id:'sliedrecht_nl',
+        short: 'Sliedrecht',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/ab8997d4-8c32-4f96-aa3e-d5961baeaf6f/resource/fc898475-4fa6-47f3-9a9a-8e85acb7b6a4/download/sliedrechtbomen20170412.csv',
+        info:'https://data.overheid.nl/dataset/bomen-sliedrecht',
+        crosswalk: {
+            installed: 'Aanlegjaar',
+            common: 'Naam_NL',
+            ref: 'Objectcode',
+            scientific: 'Boomsort',
+
+        },
+        license: 'CC0-1.0',
+        centre: [4.773, 51.82],
+        srs: 'EPSG:28992',
+    },
+    {
+        id:'assen_nl',
+        short: 'Assen',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/3ad3233b9b1c4fb0bffb23b36b0474c9_0.csv',
+        info:'https://data.overheid.nl/dataset/dataset-bomen-assen#panel-4-downloadable-files',
+        crosswalk: {
+            ref: 'BOOMNUMMER',
+            updated: 'DATUM',
+            scientific: 'BOOMSOORT',
+            planted: 'PLANTJAAR',
+            height: 'CODE_HOOGTE', // also HOOGTE
+            health: 'CONDITIE',
+            owner: 'EIGENAARSTYPE',
+            // lots of others...
+
+
+        },
+        license: 'CC-BY-4.0',
+        centre: [6.5475, 52.991]
+    },
+    {
+        id:'arnhem_nl',
+        short: 'Arnhem',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/4d988cd7848049d3a574fcbd477985be_0.csv',
+        info:'https://data.overheid.nl/dataset/bomenkaart-arnhem#panel-4-downloadable-files',
+        crosswalk: {
+            ref: 'BEHEERCODE',
+            scientific: 'BOOMSOORT',
+            common: 'NEDERLANDSE_NAAM',
+            planted: 'PLANTJAAR',
+            owner: 'EIGENAAR',
+            //...others
+
+        },
+        license: 'CC-BY-4.0',
+        centre: [5.914, 51.984],
+    },
+    {
+        id:'delft_nl',
+        short: 'Delft',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/e510d480282944c3a16c8a46d3d99064_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D',
+        info:'https://data.overheid.nl/dataset/bomen-in-beheer-door-gemeente-delft',
+        format:'csv',
+        crosswalk: {
+            ref: 'ID_VELD',
+            scientific: 'BOOMSOORT_',
+            height: 'BOOMHOOGTE',
+            health: 'CONDITIE_K',
+
+        },
+        license: 'CC0-1.0',
+    },
+    {
+        id:'groningen_nl',
+        short: 'Groningen',
+        long: '',
+        download: ' https://ckan.dataplatform.nl/dataset/9861d295-21cd-4ece-8648-88b141dc3532/resource/e5fa772f-cae6-42de-b0a8-261a8fe87ee8/download/gem_groningen_bomen.json ',
+        info:'',
+        crosswalk: {
+            common: 'NEDNAAM',
+            scientific: 'LATNAAM',
+            owner: 'OMSCHRIJVP',
+
+        },
+        license: 'CC0-1.0',
+    },
+    {
+        id:'alblasserdam_nl',
+        short: 'Alblasserdam',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/74c93ecc-82cc-46fa-8210-04818ae27279/resource/5bc33717-ff42-4aab-8bed-5ed0f618b1f8/download/gegevens-bomen-2017-alblasserdam.csv',
+        info:'https://data.overheid.nl/dataset/bomen-alblasserdam',
+        crosswalk: {
+            scientific: 'Boomsoort',
+            common: 'Boomsoort Nederlands',
+            
+        },
+        srs: 'EPSG:28992',
+
+        license: 'CC0-1.0',
+    },
+    {
+        id:'zvartewaterland_nl',
+        short: 'Zvartewaterland',
+        long: '',
+        download: 'https://opendata.arcgis.com/datasets/70e9a2ad03cf49a5a45b2076091b7ef3_0.csv',
+        info:'https://data.overheid.nl/dataset/bomen-zwartewaterland',
+        crosswalk: {
+            common: 'NEDBOOMSOORT',
+            scientific: 'LATBOOMSOORT',
+            installed: 'AANLEGJAAR',
+
+        },
+        license: 'CC-BY-4.0',
+    },
+    // broken
+    // {
+    //     id:'lingewaard_nl',
+    //     short: 'Lingewaard',
+    //     long: '',
+    //     download: 'https://geodatastore.pdok.nl/id/dataset/3251be7c-b01f-4503-8858-0958c004e6de',
+    //     info:'https://data.overheid.nl/dataset/waardevolle-bomen-gemeente-lingewaard',
+    //     format:'zip',
+    //     crosswalk: {
+    //     },
+    //     license: 'CC0-1.0',
+    // },
+    {
+        id:'barendrecht_nl',
+        short: 'Barendrecht',
+        format: 'csv',
+        long: '',
+        download: 'https://maps.bar-organisatie.nl/Online/Open%20Data%20Portaal/Barendrecht/Bomen/Bomen.CSV',
+        info:'https://data.overheid.nl/dataset/58765-bomen-barendrecht',
+        crosswalk: {
+            owner: 'BEHEERDER',
+            common: 'NEDBOOMSOORT',
+            scientific: 'LATBOOMSOORT',
+            dbh: 'DIAMETER',
+            installed: 'AANLEGJAAR',
+            updated: 'INSPECTIEDATUM',
+
+        },
+        license: 'CC0-1.0',
+        srs: 'EPSG:28992',
+    },
+    {
+        id:'zaanstad_nl',
+        short: 'Zaanstad',
+        long: '',
+        download: 'https://ckan.dataplatform.nl/dataset/fde68bfe-9e7b-4db6-9924-485166029eaf/resource/96c805d4-fd3c-41ce-8e35-c98b30513819/download/znstdor15o-bor_vegetatie.csv',
+        info:'https://data.overheid.nl/dataset/znstdor15o',
+        crosswalk: {
+            scientific: 'soortnaam_bomen',
+        },
+        license: 'CC0-1.0',
+    },
+    {
+        id:'nijmegen_nl',
+        short: 'Nijmegen',
+        long: '',
+        download: 'https://services.nijmegen.nl/geoservices/extern_OpenData/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=extern_kaartviewer_GRN_BOMEN&outputFormat=csv',
+        info:'https://opendata.nijmegen.nl/dataset/geoserver-bomen-nijmegen',
+        format:'csv',
+        crosswalk: {
+            ref: 'ID',
+            planted: 'PLANTJAAR',
+            scientific: 'BOOMSOORT',
+            updated: 'DATUM_BIJGEWERKT',
+
+        },
+        license: 'CC0-1.0',
+        srs: 'EPSG:28992',
+    },
+    {
+        id:'haarlem_nl',
+        short: 'Haarlem',
+        long: '',
+        download: 'https://data.haarlem.nl/geoserver/wfs?service=WFS&version=2.0&request=GetFeature&outputFormat=csv&srsName=EPSG%3A4326&typeName=gemeentehaarlem:bor_bomen&bbox=491380.2526954542,6859676.6140624685,532619.7473045458,6880323.3859375315,EPSG%3A3857',
+        format:'csv',
+        info:'https://www.haarlem.nl/opendata/open-data-detail/#/odp/odp_datasets.33',
+        crosswalk: {
+            ref: 'boomnummer',
+            scientific: 'name',
+            age: 'leeftijd',
+            crown: 'kroondiameter',
+            owner: 'beheerder',
+
+        },
+        license: '',
+    },
+].map(x => ({ ...x, country: 'Netherlands' }));

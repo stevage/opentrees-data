@@ -50,7 +50,12 @@ try {
 
 let sources = require('./sources');
 
-const sourceStats = require('./source-stats.json');
+let sourceStats = {};
+try {
+    sourceStats = require('./source-stats.json');
+} catch (e) {
+    console.warn('Starting new source-stats.json');
+}
 sources.forEach(s => sourceStats[s.id] = sourceStats[s.id] || {});
 
 // sources = 'melbourne ballarat'.split(' ').map(x => ({ id: x }));
@@ -120,7 +125,10 @@ function addTaxa(tree) {
 
 function addSpeciesCount(tree) {
     if (tree.genus && tree.species) {
-        tree.species_count = taxoCount.species[tree.genus + ' ' + tree.species];
+        const scientific = tree.genus + ' ' + tree.species;
+        tree.species_count = taxoCount.species[scientific];
+        
+        sourceTaxoCount[tree.source].species[scientific] = 1 + (sourceTaxoCount[tree.source].species[scientific] || 0);
     }
 }
 
@@ -139,12 +147,20 @@ function showBadSpeciesCounts() {
 
 console.log(`Combining temporary files in tmp/out_* into ${options.allout ? 'tmp/allout.json' : 'out/*.nd.geojson'}`);
 let taxoCount = { class: {}, subclass: {}, family: {}, genus: {}, species: {} };
+let sourceTaxoCount = {};
 
 try {
     taxoCount = require('./taxoCount.json');
 } catch(e) {
-    console.warn("No taxoCount.json found. Regenerate it after processing with 3a-updateTaxoCount.js.");
+    console.warn("No taxoCount.json found. Regenerate it after processing with 3a-updateTaxoCount.js.".yellow);
 }
+
+try {
+    sourceTaxoCount = require('./sourceTaxoCount.json');
+} catch(e) {
+    console.warn("No sourceTaxoCount.json found.".yellow);
+}
+
 
 async function loadSource(source, out) {
     // const outName = `out/${source.id}.geojson`
@@ -152,10 +168,15 @@ async function loadSource(source, out) {
     //     console.log(`Skipping ${outName}`);
     // }
     let keepCount = 0, delCount = 0, noGeomCount=0;
-    let speciesCounts = {}; // per source counts
+    // let speciesCounts = {}; // per source counts // to be removed
+    const inName = `tmp/out_${source.id}.nd.geojson`;
+    if (!fs.existsSync(inName)) {
+        console.log(`${inName.cyan} doesn't exist - run 2-loadTrees again.`);
+    }
 
     return new Promise((resolve, reject) => {
-        fs.createReadStream(`tmp/out_${source.id}.nd.geojson`)
+        sourceTaxoCount[source.id] = { class: {}, subclass: {}, family: {}, genus: {}, species: {} };
+        fs.createReadStream(inName)
             .pipe(ndjson.parse())
             .on('data', tree => {
                 try {
@@ -172,17 +193,6 @@ async function loadSource(source, out) {
                         delCount ++;
                         return;
                     }
-                    
-                        // if (source.id === 'oakland') {
-                        //     // dear god why
-                        //     tree.geometry = {
-                        //         type: 'Point',
-                        //         coordinates: tree.properties['Location 1'].split('\n').reverse()[0].split(/[(), ]/).filter(Number).map(Number).reverse()
-                        //     }
-                        //     if (tree.geometry.coordinates.length < 1) {
-                        //         tree.geometry = null;
-                        //     }
-                        // }
                     if (!tree.geometry) {
                         noGeomCount ++;
                         return;
@@ -202,10 +212,10 @@ async function loadSource(source, out) {
                     }
                     addTaxa(tree.properties);
                     addSpeciesCount(tree.properties);
-
-                    if (tree.properties.genus && tree.properties.species) {
-                        speciesCounts[tree.properties.genus + ' ' + tree.properties.species] = 1 + (speciesCounts[tree.properties.genus + ' ' + tree.properties.species] || 0)
-                    }
+                    // if (tree.properties.genus && tree.properties.species) {
+                    //     speciesCounts[tree.properties.genus + ' ' + tree.properties.species] = 1 + (speciesCounts[tree.properties.genus + ' ' + tree.properties.species] || 0)
+                    // }
+            
                 
                     keepCount ++;
                     totalCount ++;
@@ -227,10 +237,10 @@ async function loadSource(source, out) {
                     keepCount,
                     delCount,
                     noGeomCount,
-                    differentSpecies: Object.keys(speciesCounts).length,
-                    speciesCounts: Object.keys(speciesCounts)
-                        .filter(species => speciesCounts[species] > keepCount / 100) // keep any species that is at least X% of the total
-                        .map(species => [species, speciesCounts[species]])
+                    differentSpecies: Object.keys(sourceTaxoCount[source.id].species).length,
+                    speciesCounts: Object.keys(sourceTaxoCount[source.id].species)
+                        .filter(species => sourceTaxoCount[source.id].species[species] > keepCount / 100) // keep any species that is at least X% of the total
+                        .map(species => [species, sourceTaxoCount[source.id].species[species]])
                         .sort(([a_, countA], [b, countB]) => countB - countA)
                 };
                 
@@ -279,22 +289,28 @@ async function process() {
     let skipped = await loadSources();
     if (skipped > 0) {
         console.log ('Not writing out stats tables due to skipped processing.');
-        return;
+        
+    } else {
+        console.log('Writing out: ');
+        // TOOD make this work on per-source basis
+        showBadSpeciesCounts(); 
     }
-    console.log('Writing out: ');
-    showBadSpeciesCounts();
-    const notOpenCount = 31589; // Sydney
+    
     const stats = {
         sources: sources.length,
-        keptTrees: totalCount,
-        openTrees: totalCount - notOpenCount,
+        keptTrees: sources.reduce((total, {id}) => total + sourceStats[id].keepCount, 0),
         countries: [...(new Set(sources.map(s => s.country).filter(Boolean))).keys()]
-    }
+    };
+    const notOpenCount = 31589; // Sydney
+    stats.openTrees = stats.keptTrees - notOpenCount;
     fs.writeFileSync('./stats.json', JSON.stringify(stats));
-    fs.writeFileSync('./source-stats.json', JSON.stringify(sourceStats, null, 2));
     console.log(`${stats.openTrees.toLocaleString()} open data trees from ${stats.sources} sources.`);
+
+    fs.writeFileSync('./source-stats.json', JSON.stringify(sourceStats, null, 2));
+    fs.writeFileSync('./sourceTaxoCount.json', JSON.stringify(sourceTaxoCount, null, 2));
     console.log(`\nDone in ${perf.stop('process').words}.`);
     require('./export-sources');
+    require('./3a-mergeTaxoCounts');
 }
 
 process();

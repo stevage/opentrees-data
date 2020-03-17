@@ -46,7 +46,8 @@ module.exports = [
             maturity: 'age',
             height: 'height',
             location: 'site_name',
-        }
+        },
+        centre: [-1.8673,52.47],
 
     },
     {

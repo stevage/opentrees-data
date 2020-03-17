@@ -24,9 +24,12 @@ sources.forEach(function(source) {
         // hmm, 'format' is used for saving the file, but also knowing what file to import.
         var format = source.zip ? 'zip' : source.format;
         if (!format) {
-            format = match(url, /\.([a-z]+)$/, 1);
+            format = match(url, /\.([a-z]+)$/i, 1);
         }
-
+        if (source.format === 'json') {
+            source.format = 'geojson';
+        }
+    
             
         if (source.keepExtension) {
             format = url.match(/\.([^.]+)$/)[1];

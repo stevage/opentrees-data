@@ -283,14 +283,15 @@ module.exports = [
         id:'groningen_nl',
         short: 'Groningen',
         long: '',
-        download: ' https://ckan.dataplatform.nl/dataset/9861d295-21cd-4ece-8648-88b141dc3532/resource/e5fa772f-cae6-42de-b0a8-261a8fe87ee8/download/gem_groningen_bomen.json ',
-        info:'',
+        download: 'https://ckan.dataplatform.nl/dataset/9861d295-21cd-4ece-8648-88b141dc3532/resource/4a52525e-04ac-4934-8294-a2566986b24f/download/gem_groningen_bomen.zip',
+        info:'https://ckan.dataplatform.nl/dataset/9861d295-21cd-4ece-8648-88b141dc3532',
         crosswalk: {
             common: 'NEDNAAM',
             scientific: 'LATNAAM',
             owner: 'OMSCHRIJVP',
 
         },
+        srs: 'EPSG:28992',
         license: 'CC0-1.0',
     },
     {

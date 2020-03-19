@@ -228,8 +228,10 @@ module.exports = [
     country: 'Australia',
     crosswalk: identity,
 },
+/*
 {
     id: 'ryde',
+    // multiple files is not supported atm
     download: [ 
         'http://data.nsw.gov.au/data/dataset/f7cd2071-642e-4cac-9d28-d7ddf5635c39/resource/47843888-f9b6-4ae3-ba80-9318ff60a120/download/Public-Trees-2013.dbf',
         'http://data.nsw.gov.au/data/dataset/f7cd2071-642e-4cac-9d28-d7ddf5635c39/resource/1372b28f-4201-46ab-9099-be0458a317bb/download/Public-Trees-2013.prj',
@@ -246,6 +248,7 @@ module.exports = [
     }
 
 },
+*/
 {
     id: 'southern_grampians',
     download: 'http://data.gov.au/geoserver/southern-grampians-street-and-park-trees/wfs?request=GetFeature&typeName=ckan_4a2843f5_8c01_438b_95f3_01ef0a518441&outputFormat=json',

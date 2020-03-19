@@ -244,4 +244,93 @@ module.exports = [
         Error with unzip/hamburg/Strassenbaumkataster_HH_2019-06-19.gml (hamburg)
         */
     },
+    {
+        id:'karlsruhe_de',
+        short: 'Karlsruhe',
+        long: '',
+        // are more fields possibly by altering this URL?
+        download: 'https://geoportal.karlsruhe.de/server/rest/services/Fachplaene/Baumkataster/MapServer/1/query?where=ARTDEUT+IS+NOT+NULL&outFields=ARTDEUT%2CARTLAT&returnGeometry=true&f=geojson',
+        info:'https://transparenz.karlsruhe.de/dataset/fachplane-baumkataster/resource/9cd1989f-9720-4621-b171-3c4e56352598',
+        crosswalk: {
+            common: 'ARTDEUT',
+            scientific: 'ARTLAT',
+
+        },
+        license: '',
+    },
+    {
+        id:'gelsenkirchen_de',
+        short: 'Gelsenkirchen',
+        long: '',
+        download: 'https://opendata.gelsenkirchen.de/sites/default/files/baumkataster_ge.csv',
+        info:'https://opendata.gelsenkirchen.de/dataset/baumkataster-gelsenkirchen',
+        srs: 'EPSG:3044',
+        crosswalk: {
+            scientific: 'BAUMART',
+            // SORTE?
+            planted: 'PFLANZJAHR',
+            crown: 'KRONENDURCHMESSER',
+            height: 'HOEHE',
+            ref: 'BAUMID',
+            // common: 
+        },
+        license: 'https://www.govdata.de/dl-de/by-2-0',
+    },
+    // {
+    //     id:'krefeld_de',
+    //     short: 'Krefeld',
+    //     long: 'Stadt Krefeld',
+    //     download: 'http://geoportal-niederrhein.de/files/opendatagis/Stadt_Krefeld/Aktueller_Baumbestand.geojson',
+    //     info:'https://www.offenesdatenportal.de/dataset/baumstandorte-der-stadt-krefeld',
+    //     crosswalk: {
+    //     },
+    //     license: 'https://www.govdata.de/dl-de/zero-2-0',
+    // },
+
+    // can't download for some reason
+    // {
+    //     id:'moers_de',
+    //     short: 'Mörs',
+    //     long: 'Stadt Mörs',
+    //     download: 'https://www.offenesdatenportal.de/dataset/cc69db13-f6b9-4319-9ee6-3f385dc7d944/resource/6c36f4a2-560e-4689-93cc-6af845247c38/download/baumstrauch.json',
+    //     info:'https://www.offenesdatenportal.de/dataset/baume-und-straucher-in-bebauten-ortslagen',
+    //     crosswalk: {
+    //     },
+    //     license: 'https://www.govdata.de/dl-de/zero-2-0',
+    // },
+    {
+        id:'troisdorf_de',
+        short: 'Troisdorf',
+        long: 'Stadt Troisdorf',
+        download: 'http://www.stadtplan.troisdorf.de/opengeodata/opendata/data/Troisdorf_Baumkataster_180926.zip',
+        info:'http://www.stadtplan.troisdorf.de/opengeodata/opendata/open_data_baumkataster.html',
+        format: 'csv',
+        zip: true,
+        coordsFunc: (props) => [Number(props['X-Koordinate'].replace(',','.')), Number(props['Y-Koordinate'].replace(',','.'))],
+        crosswalk: {
+            height: 'Baumhoehe',
+            scientific: x => x.Baumart.split(', ')[0],
+            common: x => x.Baumart.split(', ')[1],
+            crown: 'Kronendurchmesser',
+            dbh: 'Stammumfang',
+        },
+        license: 'https://www.govdata.de/dl-de/by-2-0',
+    },
+    {
+        id:'jena_de',
+        short: 'Jena',
+        long: '',
+        download: 'https://opendata.jena.de/dataset/acd67e0c-b597-48c7-b251-1b565c49de90/resource/3ff727bb-8db4-4b47-9c53-7084d15f73d6/download/baumkataster.csv',
+        info:'https://opendata.jena.de/dataset/baumkataster',
+        crosswalk: {
+            height: 'baumhoehe',
+            ref: 'baumnummer',
+            scientific: 'ga_lang',
+            dbh: 'st_umfang',
+            health: 'vitalitaet',
+
+        },
+        srs: 'EPSG:3044',
+        license: 'https://www.govdata.de/dl-de/by-2-0',
+    },
 ].map(s => {s.country = 'Germany'; return s; });

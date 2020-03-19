@@ -29,6 +29,7 @@
     "mapbox-upload": "^4.2.4",
     "mbtiles": "^0.9.0",
     "ndjson": "^1.5.0",
+    "recursive-readdir": "^2.2.2",
     "tessera": "^0.14.1",
     "tippecanoe": "^0.6.0"
   }

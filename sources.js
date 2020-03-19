@@ -8,13 +8,14 @@ info: URL that is the landing page for more information about dataset
 format: The file extension, eg zip/geojson/csv. Not required if present in download URL.
 filename: If the specific file to pass to OGR2OGR needs to be set. Useful for complex zip files, or vrt files.
 latitudeField,longitudeField: for csv files, the specific fields containing lat/long. Can usually be guessed, so not required.
-license: SPDX specifier for license (eg CC-BY-4.0)
+license: SPDX specifier for license (eg CC-BY-4.0) or URL
 crosswalk: set of fields that map to opentrees schema. If a function is given, it's called with geojson properties object.
 country: name of country the source is within.
 srs: Source SRS if not EPSG:4326 or available within Shapefile .prj file. Passed to ogr2ogr as -s_srs
 gdal_options: String, other options to pass to ogr2ogr, eg "-skipfailures"
 delFunc: called with (tree.properties, tree) for each row. If it returns true, that row is excluded.
-
+primary: the id of the main datasource for this city (in cases where 2+ datasets constitute the inventory)
+keepExtension: don't change the extension of a file when it's downloaded (usually paired with filename=)
 
 Crosswalk (opentrees schema):
 scientific: full botanical name
@@ -31,7 +32,6 @@ ule: useful life expectancy, in years (TODO a better way of doing this with abso
 updated: date that data was last updated (TOOD distinguish between various kinds of updates maybe)
 planted: Date that tree was planted as a seed (not used much - need to be clearer about semantics and date format)
 
-
 Future fields:
 - installation date?
 
@@ -40,7 +40,7 @@ Future fields:
 
 
 */
-
+const fs = require('fs');
 const sources = [    
 
     {
@@ -198,45 +198,6 @@ const sources = [
     //     }
     // },
     
-    
-    {
-        id: 'vienna',
-        country: 'Austria',
-        // downloads soooo slowly
-        download: 'https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:BAUMKATOGD&srsName=EPSG:4326&outputFormat=csv',
-        info:'https://www.data.gv.at/katalog/dataset/c91a4635-8b7d-43fe-9b27-d95dec8392a7',
-        format: 'csv',
-        short: 'Vienna',
-        crosswalk: {
-            ref: 'BAUM_ID',
-            dbh: x => x.STAMMUNGFANG / 3.14159 * 2,
-            height: 'BAUMHOEHE',
-            scientific: 'GATTUNG_ART',
-            crown: 'KRONENDURCHMESSER',
-        },
-        license:'CC-BY-4.0' 
-
-    },
-
-    {
-        id:'linz',
-        country: 'Austria',
-        short: 'Linz',
-        long: 'City of Linz',
-        download: 'http://data.linz.gv.at/katalog/umwelt/baumkataster/2020/FME_BaumdatenBearbeitet_OGD_20200225.csv',
-        info:'https://www.data.gv.at/katalog/dataset/baumkataster',
-        format: 'csv',
-        crosswalk: {
-            ref: 'BaumNr',
-            genus: 'Gattung',
-            species: x => x.Art !== '0' ? x.Art : undefined,
-            common: 'NameDeutsch',
-            height: 'Hoehe',
-            crown: 'Schirmdurchmesser',
-            dbh: 'Stammumfang',
-        },
-        license:'CC-BY-4.0' 
-    },
     {
         id:'luxembourg',
         country: 'Luxembourg',
@@ -269,30 +230,56 @@ const sources = [
         centre: [-70.877,-29.859],
     },
         
-    {
-        id:'antwerpen_be',
-        country: 'Belgium',
-        short: 'Antwerp',
-        long: '',
-        download: 'https://opendata.arcgis.com/datasets/0293af55ca454b44ba789ee14c82543a_676.zip',
-        info:'https://portaal-stadantwerpen.opendata.arcgis.com/datasets/boom/data',
-        crosswalk: {
-            scientific: 'LATBOOMSOO',
-            dbh: 'STAMOMTREK',
-            ref: 'ANTW_ID',
+    // we need to support individual shapefile download
+    // {
+    //     id:'thessaloniki_gr',
+    //     short: 'Thessaloniki',
+    //     country: 'Greece',
+    //     long: '',
+    //     download: '',
+    //     info:'https://opendata.thessaloniki.gr/el/dataset/%CE%B1%CF%81%CF%87%CE%B5%CE%AF%CE%BF-%CE%B3%CE%B5%CF%89%CE%B3%CF%81%CE%B1%CF%86%CE%B9%CE%BA%CE%AE%CF%82-%CE%B1%CF%80%CF%8C%CE%B4%CE%BF%CF%83%CE%B7%CF%82-%CF%83%CE%B7%CE%BC%CE%B5%CE%B9%CE%B1%CE%BA%CE%AC-%CE%B4%CE%B5%CE%B4%CE%BF%CE%BC%CE%AD%CE%BD%CE%B1-%CF%84%CF%89%CE%BD-%CE%B8%CE%AD%CF%83%CE%B5%CF%89%CE%BD-%CE%B4%CE%AD%CE%BD%CE%B4%CF%81%CF%89%CE%BD-%CF%83%CF%84%CE%BF-%CE%B4%CE%AE%CE%BC%CE%BF-%CE%B8%CE%B5%CF%83%CF%83%CE%B1%CE%BB%CE%BF%CE%BD%CE%AF%CE%BA%CE%B7%CF%82-9',
+    //     crosswalk: {
+    //     },
+    //     license: '',
+    // },
 
-        }
+    {
+        id:'bologna_it',
+        short: 'Bologna',
+        long: 'Comune di Bologna',
+        country: 'Italy',
+        download: 'http://dati.comune.bologna.it/download/file/fid/3989',
+        info:'http://dati.comune.bologna.it/node/207',
+        format: 'zip',
+        crosswalk: {
+            scientific: 'decodifi_4',
+            circumference: 'decodifi_2', //??
+            ref: 'NUM_PT',
+            // CL_H? height? health?
+        },
+        license: 'CC-BY-3.0 IT', // CC-BY-3.0 IT
+        licenseUrl: 'http://dati.comune.bologna.it/node/165',
     },
-    ...require('./sources/canada'),
-    ...require('./sources/australia'),
-    ...require('./sources/france'),
-    ...require('./sources/usa'),
-    ...require('./sources/germany'),
-    ...require('./sources/sweden'),
-    ...require('./sources/uk'),
-    ...require('./sources/netherlands'),
-    ...require('./sources/spain'),
+    {
+        id:'villa_manin_it',
+        short: 'Villa_Manin',
+        country: 'Italy',
+        long: '',
+        download: 'https://www.dati.friuliveneziagiulia.it/api/views/uqpq-dr8x/rows.csv?accessType=DOWNLOAD',
+        info:'https://www.dati.friuliveneziagiulia.it/dataset/Alberi-di-Villa-Manin/uqpq-dr8x',
+        // coordsFunc: x => x['Nuova colonna georeferenziata'].split(/[(), ]/).filter(Number).map(Number),
+        crosswalk: {
+            location: 'dove',
+            scientific: 'specie',
+            family: 'familia',
+            updated: 'data rilievo',
+            // lots more fields with very weird names like 'SFRC|SFR', 'PIP|PI'
+        },
+        license: '',
+    },
+
 ];
+fs.readdirSync(`sources`).forEach(sourceName => sources.push(...require(`./sources/${sourceName}`)));
 
 module.exports = sources;
 // module.exports = sources.filter(x => x.id === 'cupertino')
@@ -303,6 +290,12 @@ module.exports = sources;
      - some are 'groups of trees' which is ugly
 
      Esri "community data": - http://hub.arcgis.com/datasets/esri::trees/data
+
+    - Engerwitzdorf (Austria): https://www.data.gv.at/katalog/dataset/baumkataster-der-gemeinde-engerwitzdorf/resource/bed4f301-a8be-4262-98e2-bc3b94463679
+      - Rar file contains a dozen directories of shapefiles
+
+
+
 
     */
     /*{

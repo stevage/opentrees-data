@@ -356,4 +356,80 @@ module.exports = [
         ref: 'obj_ident',
     }
 },
+{
+    id:'divonne_les_bains_fr',
+    short: 'Divonne-les-Bains',
+    long: '',
+    // ugh, probably requires manual regeneration of link
+    download: 'https://telecarto.datara.gouv.fr/DOWNLOAD/Telechargement_1584570708_1630.zip',
+    info:'https://www.datara.gouv.fr/geonetwork/srv/fre/catalog.search#/metadata/b18070b7-4349-4fd5-8e56-1dc48c3eb03a',
+    // limited scope? only collected for battle against one pest 
+    // check for date_abatt?
+    // sigh, multipoint
+    crosswalk: {
+        genus: x => x.genre.replace('spp.', ''),
+        species: 'espece',
+        height: 'classe_hau',
+        circumerence: 'classe_cir',
+        // cepee? 
+
+
+    },
+    license: '',
+},
+{
+    id:'bretagne_fr',
+    short: 'Bretagne',
+    long: 'La Région Bretagne',
+    download: 'https://data.bretagne.bzh/explore/dataset/patrimoine-arbore-ponctuel-des-voies-navigables-appartenant-a-la-region-bretagne/download/?format=shp&timezone=Australia/Sydney&lang=fr',
+    info:'https://data.bretagne.bzh/explore/dataset/patrimoine-arbore-ponctuel-des-voies-navigables-appartenant-a-la-region-bretagne/export/',
+    crosswalk: {
+        ref: 'gml_id', 
+        common: 'essence',
+        height: 'hauteur',
+        dbh: 'diametre',
+        health: 'etat_genera',
+        note: 'remarque',
+    },
+    license: '',
+},
+{
+    id:'guingamp_fr',
+    short: 'Guingamp',
+    long: 'Ville de Guingamp',
+    download: 'https://datarmor.cotesdarmor.fr:443/dataserver/cg22/data/Arbres_Guingamp?&$format=csv',
+    info:'https://datarmor.cotesdarmor.fr/data-presentation-ux/#/cg22/datasets/Arbres_Guingamp/views/grid?primary-bg-color=@046D8B&primary-font-color=@fff',
+    crosswalk: {
+        genus: 'Genre',
+        species: 'Espce',
+        variety: 'VArit',
+    },
+    license: '',
+},
+{
+    id:'paris_sud_fr',
+    short: 'Grand Paris Sud', // Seine - Essonne - Sénart
+    long: '',
+    download: 'https://data.grandparissud.fr/explore/dataset/patrimoine-arbore/download/?format=shp&timezone=Australia/Sydney&lang=fr',
+    info:'https://data.grandparissud.fr/explore/dataset/patrimoine-arbore/export/',
+    crosswalk: {
+        location: 'categorie',
+        owner: 'gestionnai',
+        common: x => x.ess_fcais + ' ' + x.espe_fcais,
+        scientific: 'ess_latin',
+        age: 'classe_age',
+        health: 'vigeur_cr', // or etat_sanit?
+        updated: 'anne_expe', // ?
+        ref: 'identifian',
+
+    },
+    license: '',
+},
 ].map(s => { s.country = 'France'; return s });
+
+/*
+maybe todos:
+
+Nancy: http://opendata.grandnancy.eu/jeux-de-donnees/detail-dune-fiche-de-donnees/?tx_icsoddatastore_pi1%5Bkeywords%5D=arbre&tx_icsoddatastore_pi1%5Buid%5D=66&tx_icsoddatastore_pi1%5BreturnID%5D=447
+- contains more than just trees
+*/

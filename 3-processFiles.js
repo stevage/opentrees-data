@@ -16,6 +16,9 @@ const child_process = require('child_process');
 
 const optionList = [
     { name: 'allout', type: Boolean, defaultValue: false, description: 'Use a combined allout.geojson file' },
+    { name: 'sources', type: String, multiple: true, defaultOption: true },
+    { name: 'country', type: String, multiple: true, description: 'Restrict processing to these countries.' },
+    { name: 'force', alias: 'f', type: Boolean, description: 'Overwrite existing output files.' },
     { name: 'help', type: Boolean, alias: 'h' },
 
 ];
@@ -32,7 +35,6 @@ function help() {
         }
     ]));
 }
-
 try {
     options = require('command-line-args')(optionList);
     if (options.help) {
@@ -44,11 +46,11 @@ try {
     help();
     process.exit(1);
 }
+let sources = require('./sources')
+    .filter(s => !options.sources || options.sources.find(os => os === s.id))
+    .filter(s => !options.country || options.country.find(c => (s.country || '').toLowerCase() === c.toLowerCase()));
 
 
-
-
-let sources = require('./sources');
 
 let sourceStats = {};
 try {
@@ -145,7 +147,11 @@ function showBadSpeciesCounts() {
 };
 
 
-console.log(`Combining temporary files in tmp/out_* into ${options.allout ? 'tmp/allout.json' : 'out/*.nd.geojson'}`);
+if (options.allout) {
+    console.log(`Combining temporary files in tmp/out_* into tmp/allout.json`);
+} else {
+    console.log(`Individually processing temporary files from tmp/out_* into out/*.nd.geojson`);
+}
 let taxoCount = { class: {}, subclass: {}, family: {}, genus: {}, species: {} };
 let sourceTaxoCount = {};
 
@@ -172,6 +178,7 @@ async function loadSource(source, out) {
     const inName = `tmp/out_${source.id}.nd.geojson`;
     if (!fs.existsSync(inName)) {
         console.log(`${inName.cyan} doesn't exist - run 2-loadTrees again.`);
+        return;
     }
 
     return new Promise((resolve, reject) => {
@@ -269,11 +276,11 @@ async function loadSources() {
             } else {
                 const outName = `out/${source.id}.nd.geojson`
                 
-                if (!fs.existsSync(outName)) {
+                if (fs.existsSync(outName) && !options.force) {
+                    skipCount ++
+                } else {
                     const localOutfile = fs.createWriteStream(outName).on('error', console.error);
                     return loadSource(source, localOutfile);
-                } else {
-                    skipCount ++
                 }
             }
         }))
@@ -285,7 +292,7 @@ const perf = require('execution-time')();
 perf.start('process');
 
 let totalCount = 0;
-async function process() {
+async function processSources() {
     let skipped = await loadSources();
     if (skipped > 0) {
         console.log ('Not writing out stats tables due to skipped processing.');
@@ -298,7 +305,7 @@ async function process() {
     
     const stats = {
         sources: sources.length,
-        keptTrees: sources.reduce((total, {id}) => total + sourceStats[id].keepCount, 0),
+        keptTrees: sources.reduce((total, {id}) => total + (sourceStats[id].keepCount || 0), 0),
         countries: [...(new Set(sources.map(s => s.country).filter(Boolean))).keys()]
     };
     const notOpenCount = 31589; // Sydney
@@ -313,4 +320,4 @@ async function process() {
     require('./3a-mergeTaxoCounts');
 }
 
-process();
+processSources();

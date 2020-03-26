@@ -1,4 +1,9 @@
 #!/usr/bin/env node --max-old-space-size=8192
+/*
+Step 1:
+  - download file, call it something sensible on disk
+  - if it's a zip file, unzip it into a sensible directory name
+*/
 /* jshint esnext:true */
 const fs = require('fs');
 const colors = require('colors');

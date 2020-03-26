@@ -1,5 +1,13 @@
 #!/usr/bin/env node --max-old-space-size=8192
+/*
+Step 2: 
+  - convert whatever file format we downloaded into newline-delimited geojson
+  - look for geometry columns in CSVs
+  - deal with projections
+  - try hard to end up with valid geometry. occasionally that has to happen in step 3.
 
+
+*/
 
 
 const sources = require('./sources');
@@ -55,8 +63,8 @@ sources.forEach(async source => {
         if (filename) {
             if (extension === 'csv') {
                 source.srs = source.srs || 'EPSG:4326';
-                const xFields = source.longitudeField || 'Longitude,Lon,Lng,LONG,X,X_LONG,long,X_Koordina,X-Koordinate,coord long';
-                const yFields = source.latitudeField || 'Latitude,Lat,LAT,Y,Y_LAT,lat,Y_Koordina,Y-Koordinate,coord lat'
+                const xFields = source.longitudeField || 'Longitude,Lon,Lng,LONG,X,X_LONG,long,X_Koordina,X-Koordinate,coord long,X_COORD,COORDENADA X';
+                const yFields = source.latitudeField || 'Latitude,Lat,LAT,Y,Y_LAT,lat,Y_Koordina,Y-Koordinate,coord lat,Y_COORD,COORDENADA Y'
                 const geomFields = source.geometryField || 'the_geom,SHAPE,wkb_geometry,geo_shape,GEOMETRIE,geom';
                 extraFields += `-oo GEOM_POSSIBLE_NAMES="${geomFields}" -oo Y_POSSIBLE_NAMES="${yFields}" -oo "X_POSSIBLE_NAMES=${xFields}"`;
             }
@@ -65,7 +73,7 @@ sources.forEach(async source => {
             }
 
             console.log(filename);
-            let cmd = `ogr2ogr -t_srs EPSG:4326 -gt 65536 ${extraFields} -f GeoJSONSeq ../${outname} ${source.gdal_options || ''} "${filename}"`;
+            let cmd = `ogr2ogr -t_srs EPSG:4326 -gt 65536 ${extraFields} -f GeoJSONSeq ../${outname} ${source.gdal_options || source.gdalOptions || ''} "${filename}"`;
             console.log(cmd.cyan);
             child_process.execSync(cmd, { cwd: 'data' });
             console.log(`Loaded ${filename}`);
@@ -78,7 +86,7 @@ sources.forEach(async source => {
         }
     } catch (e) {
         console.log(`Error with ${filename} (${source.id})`);
-        console.error(e.error || e);
+        console.error(e.error);
     }
 });
 console.log(`Finished converting trees in ${perf.stop('load').words}. Skipped ${skipped} sources.`);

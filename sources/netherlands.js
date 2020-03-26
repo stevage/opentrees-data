@@ -293,6 +293,7 @@ module.exports = [
         },
         srs: 'EPSG:28992',
         license: 'CC0-1.0',
+        centre: [6.58358, 53.2212],
     },
     {
         id:'alblasserdam_nl',

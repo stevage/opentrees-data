@@ -1,3 +1,4 @@
+
 function match(s, regex, patternNo) {
     if (!s) {
         return;
@@ -29,7 +30,7 @@ function formatForSource(source) {
         format = 'shp';
     }
     if (!format) {
-        if (match(url, /(shp$|format=shp|\.shp)/)) {
+        if (match(url, /(shp$|format=shp|\.shp|\.zip)/)) {
             format = 'shp';
         } else if (match(url, /(csv$|format=csv|\.csv)/)) {
             format = 'csv';

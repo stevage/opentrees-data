@@ -570,7 +570,7 @@ module.exports = [
     },
     {
         id: 'kitchener_ca',
-        short: 'Kitchene',
+        short: 'Kitchener',
         long: '',
         download:
             'https://opendata.arcgis.com/datasets/e42a9601b87a4417b3d3d15a0f596f64_0.zip',

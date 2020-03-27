@@ -152,5 +152,6 @@ module.exports = [
             updated: 'survey_date',
         },
         license: '',
+        centre: [-3.684357, 51.826852],
     },
 ];

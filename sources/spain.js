@@ -120,6 +120,7 @@ module.exports = [
         info:
             'https://datos.gob.es/es/catalogo/l01280148-inventario-arboles-casco-urbano-20151',
         srs: 'EPSG:32630',
+        delFunc: x => x.ESTADO === 'ALCORQUE VACIO', // empty land
         crosswalk: {
             ref: 'REFERENCIA',
             scientific: 'EMPLAZAMIENTO',
@@ -144,11 +145,11 @@ module.exports = [
             scientific: x =>
                 String(x.dbpedia_owl_species)
                     .replace(/.*\//, '')
-                    .replace(/_/g, ''),
+                    .replace(/_/g, ' '),
             family: x =>
                 String(x.dbpedia_owl_family)
                     .replace(/.*\//, '')
-                    .replace(/_/g, ''),
+                    .replace(/_/g, ' '),
             height: 'om_altura',
         },
         license: '',

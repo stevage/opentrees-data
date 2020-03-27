@@ -314,6 +314,7 @@ const sources = [
             updated: 'Fecha_registro',
         },
         license: '',
+        centre: [-100.3071, 25.6801],
     },
 ];
 fs.readdirSync(`sources`).forEach(sourceName =>

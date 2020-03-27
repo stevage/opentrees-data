@@ -83,6 +83,9 @@ module.exports = [
         },
         license: '',
     },
+
+    /*
+    // ugh, very messed up. Even most of the coordinates are bad, like "[-3,44509490754315]"
     {
         id: 'madrid_es',
         short: 'Madrid',
@@ -97,7 +100,7 @@ module.exports = [
             description: 'Description', // seriously? HTML table. this cannot end well.
         },
         license: '',
-    },
+    },*/
     {
         id: 'torrent_es',
         short: 'Torrent',

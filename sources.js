@@ -310,7 +310,7 @@ const sources = [
             ref: 'Arbol_id',
             planted: x =>
                 x.Fecha_plantado !== '0000-00-00' ? x.Fecha_plantado : null,
-            scientific: 'Especie',
+            common: 'Especie', // mostly in Spanish,
             updated: 'Fecha_registro',
         },
         license: '',

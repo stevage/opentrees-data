@@ -157,4 +157,23 @@ module.exports = [
         },
         license: '',
     },
+        {
+        id: 'girona_es',
+        short: 'Girona',
+        long: 'Ajuntament de Girona',
+        download:
+            'https://terra.girona.cat/opendata/storage/f/2020-04-17T09%3A40%3A50.946Z/arbrat2019.csv',
+        info: 'https://www.girona.cat/opendata/dataset/arbrat/resource/3d532be8-85d0-4265-81fc-1fab857c193c',
+        srs: 'EPSG:25831',
+        crosswalk: {
+            ref: 'REFERENCIA',
+            scientific: 'nom_cientific',
+            common: 'nom',
+            trunk_perimeter: 'mida_tronc', // perimeter of trunk in intervals (20-50, 50-80, 80-120, +120)
+            crown_diameter: 'mida_escocell', // perimeter of crown in intervals (-40, 40-90, +90)
+            x: 'x',
+            y: 'y'
+        },
+        license: 'https://umat.girona.cat/legal.html',
+    },
 ].map(x => ({ ...x, country: 'Spain' }));

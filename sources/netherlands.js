@@ -400,4 +400,14 @@ module.exports = [
         },
         license: '',
     },
+    {
+        id:'roosendaal_be',
+        short: 'Roosendaal',
+        long: 'Gemeente Roosendaal',
+        download: 'https://opendata.arcgis.com/datasets/f97b4a30ac914a73aa7552a96f0ae82d_0.zip',
+        info:'https://opendata.roosendaal.nl/datasets/gbi-boom-public',
+        crosswalk: {
+        },
+        license: '',
+    },
 ].map(x => ({ ...x, country: 'Netherlands' }));

@@ -58,14 +58,15 @@ module.exports = [
         short: 'Bonn',
         long: '',
         download: 'https://opendata.arcgis.com/datasets/f8f130c1dd4e4ea9b5fe1f2385673cab_0.zip',
-        info:'http://opendata.gis.ms.gov/datasets/esri-de-content::baumkataster-bonn',
+        info:'https://hub.arcgis.com/datasets/esri-de-content::baumkataster-bonn',
         format: 'zip',
         crosswalk: {
             ref: 'baum_id',
             scientific: 'lateinisch',
             common: 'deutscher_',
-            // alter_ ?
-        }
+            age: 'alter_'
+        },
+        license: 'CC0-1.0'
     },
     {
         id: 'koeln',
